@@ -1,0 +1,15 @@
+//读取图片并显示
+#include "stdio.h"
+#include<iostream> 
+#include <opencv2/core/core.hpp> 
+#include <opencv2/highgui/highgui.hpp> 
+using namespace cv;
+int main()
+{
+    Mat img = imread("C:/Users/hiter/Pictures/03.jpg");
+    namedWindow("测试opencv");
+    imshow("测试opencv", img);   
+    
+    waitKey(0);
+    destroyAllWindows();
+}
