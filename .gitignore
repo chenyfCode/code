@@ -1,0 +1,9 @@
+Images/
+Debug/
+x64/
+CodeEdit/
+.vs/
+CodeEdit.sln
+CodeEdit.vcxproj
+CodeEdit.vcxproj.filters
+CodeEdit.vcxproj.user
