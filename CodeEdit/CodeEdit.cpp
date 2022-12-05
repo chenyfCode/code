@@ -10,20 +10,14 @@
 using namespace cv;
 using namespace std;
 
-/*
-const char* imageName_L = "../Images/left03.jpg"; // 用于检测深度的图像
-const char* imageName_R = "../Images/right03.jpg";
-const char* imageList_L = "../Images/steroCalibDataL.txt"; // 左相机的标定图片名称列表
-const char* imageList_R = "../Images/steroCalibDataR.txt"; // 右相机的标定图片名称列表
-*/
-const char* imageName_L = "../Images/12038mm/2.35m A.png"; // 用于检测深度的图像
-const char* imageName_R = "../Images/12038mm/2.35m B.png";
+const char* imageName_L = "../Images/12038mm/3.05move A.png"; // 用于检测深度的图像
+const char* imageName_R = "../Images/12038mm/3.05move B.png";
 const char* imageList_L = "../Images/12038mm/steroCalibDataL.txt"; // 左相机的标定图片名称列表
 const char* imageList_R = "../Images/12038mm/steroCalibDataR.txt"; // 右相机的标定图片名称列表
 
 const char* singleCalibrate_result_L = "calibrationresults_L.txt"; // 存放左相机的标定结果
 const char* singleCalibrate_result_R = "calibrationresults_R.txt"; // 存放右相机的标定结果
-const char* stereoCalibrate_result = "stereocalibrateresult.txt"; // 存放立体标定结果
+const char* stereoCalibrate_result_L = "stereocalibrateresult.txt"; // 存放立体标定结果
 const char* stereoRectifyParams = "stereoRectifyParams.txt"; // 存放立体校正参数
 vector<vector<Point2f>> corners_seq_L; // 所有角点坐标
 vector<vector<Point2f>> corners_seq_R;
@@ -356,7 +350,7 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	imshow("最小汉明距离筛选", outimg1);
 	imshow("ransac筛选", outimg2);
 	waitKey(0);  //等待键盘输入
-	
+
 
 	/********相似三角形测距法 计算距离*******/
 	double B = sqrt(T.at<double>(0, 0) * T.at<double>(0, 0) + T.at<double>(1, 0) * T.at<double>(1, 0) + T.at<double>(2, 0) * T.at<double>(2, 0));
@@ -401,7 +395,7 @@ int main()
 	singleCameraCalibrate(imageList_R, singleCalibrate_result_R, objectPoints_R, corners_seq_R, cameraMatrix_R,
 		distCoeffs_R, imageSize, patternSize, chessboardSize);
 	cout << "已完成右相机的标定!" << endl;
-	stereoCalibrate(stereoCalibrate_result, objectPoints_L, corners_seq_L, corners_seq_R, cameraMatrix_L, distCoeffs_L,
+	stereoCalibrate(stereoCalibrate_result_L, objectPoints_L, corners_seq_L, corners_seq_R, cameraMatrix_L, distCoeffs_L,
 		cameraMatrix_R, distCoeffs_R, imageSize, R, T, E, F);
 	cout << "相机立体标定完成！" << endl;
 	//进行立体校正

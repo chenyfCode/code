@@ -11,10 +11,10 @@ using namespace cv;
 using namespace std;
 
 
-const char* imageName_L = "../Images/8mm/A1.png"; // 用于检测深度的图像
-const char* imageName_R = "../Images/8mm/B1.png";
-const char* imageList_L = "../Images/8mm/steroCalibDataL.txt"; // 左相机的标定图片名称列表
-const char* imageList_R = "../Images/8mm/steroCalibDataR.txt"; // 右相机的标定图片名称列表
+const char* imageName_L = "../Images/12038mm/2.35m A.png"; // 用于检测深度的图像
+const char* imageName_R = "../Images/12038mm/2.35m B.png";
+const char* imageList_L = "../Images/12038mm/steroCalibDataL.txt"; // 左相机的标定图片名称列表
+const char* imageList_R = "../Images/12038mm/steroCalibDataR.txt"; // 右相机的标定图片名称列表
 
 const char* singleCalibrate_result_L = "calibrationresults_L.txt"; // 存放左相机的标定结果
 const char* singleCalibrate_result_R = "calibrationresults_R.txt"; // 存放右相机的标定结果
@@ -31,7 +31,7 @@ Mat distCoeffs_R = Mat(1, 5, CV_32FC1, Scalar::all(0)); // 初始化相机的畸
 Mat R, T, E, F; // 立体标定参数
 Mat R1, R2, P1, P2, Q; // 立体校正参数
 Mat mapl1, mapl2, mapr1, mapr2; // 图像重投影映射表
-Mat img1_rectified, img2_rectified,  result3DImage; // 校正图像  深度图
+Mat img1_rectified, img2_rectified, result3DImage; // 校正图像  深度图
 Size patternSize = Size(11, 8); // 行列内角点个数
 Size chessboardSize = Size(30, 30); // 棋盘上每个棋盘格的大小mm
 Size imageSize; // 图像尺寸
@@ -374,12 +374,12 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 		double x_R = keypoints2[good_min[i].trainIdx].pt.x;
 
 		double distance = f * B / abs(x_L - x_R);
-		cout << "x_L = " << x_L << endl;
-		cout << "x_R = " << x_R << endl;		
-		cout << "距离为: " << distance << " pixel" << endl;
+		//cout << "x_L = " << x_L << endl;
+		//cout << "x_R = " << x_R << endl;
+		cout << "距离为: " << distance << " mm" << endl;
 	}
-	
-	
+
+
 	return true;
 }
 
@@ -412,7 +412,7 @@ int main()
 	cout << "已创建图像重投影映射表！" << endl;
 	//SIFT特征点提取与匹配
 	computeDisparityImage(imageName_L, imageName_R, img1_rectified, img2_rectified, mapl1, mapl2, mapr1, mapr2, validRoi);
-	
+
 	waitKey(0);  //等待键盘输入
 	return 0;
 }
