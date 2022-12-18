@@ -11,10 +11,10 @@ using namespace cv;
 using namespace std;
 
 
-const char* imageName_L = "../Images/12038mm/2.35m A.png"; // 用于检测深度的图像
-const char* imageName_R = "../Images/12038mm/2.35m B.png";
-const char* imageList_L = "../Images/12038mm/steroCalibDataL.txt"; // 左相机的标定图片名称列表
-const char* imageList_R = "../Images/12038mm/steroCalibDataR.txt"; // 右相机的标定图片名称列表
+const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // 用于检测深度的图像
+const char* imageName_R = "../Images/1206-8mm-2602mm/B0.png";
+const char* imageList_L = "../Images/1206-8mm-2602mm/steroCalibDataL.txt"; // 左相机的标定图片名称列表
+const char* imageList_R = "../Images/1206-8mm-2602mm/steroCalibDataR.txt"; // 右相机的标定图片名称列表
 
 const char* singleCalibrate_result_L = "calibrationresults_L.txt"; // 存放左相机的标定结果
 const char* singleCalibrate_result_R = "calibrationresults_R.txt"; // 存放右相机的标定结果
