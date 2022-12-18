@@ -15,16 +15,14 @@ using namespace std;
 const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // 用于检测深度的图像
 const char* imageName_R = "../Images/1206-8mm-2602mm/B0.png";
 const char* stereoRectifyParams = "stereoRectifyParams.txt"; // 存放立体校正参数
-vector<vector<Point2f>> corners_seq_L; // 所有角点坐标
-vector<vector<Point2f>> corners_seq_R;
-vector<vector<Point3f>> objectPoints_L; // 三维坐标
-vector<vector<Point3f>> objectPoints_R;
+
+
 Mat cameraMatrix_L = (cv::Mat_<float>(3, 3) << 1781.810262887706, 0, 604.4243823452152,
-	0, 1780.163208758555, 493.8393294388836,
-	0, 0, 1); // 左相机的内参数
+	                                           0, 1780.163208758555, 493.8393294388836,
+	                                           0, 0, 1); // 左相机的内参数
 Mat cameraMatrix_R = (cv::Mat_<float>(3, 3) << 1763.816741031971, 0, 617.9243882089885,
-	0, 1763.387847013527, 474.5017098333396,
-	0, 0, 1); // 右相机的内参数
+	                                           0, 1763.387847013527, 474.5017098333396,
+	                                           0, 0, 1); // 右相机的内参数
 //左右相机畸变系数
 Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.08572684461447769, 0.2389193416004575, -0.004663266549834569, 0.0009870654966580672, -0.4788910294243767); // 左相机的畸变系数
 Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.07700464555060682, 0.2205726466952272, -0.004163407776421812, 0.0004392279361322822, -1.019433830263017);// 右相机的畸变系数
@@ -234,15 +232,18 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	//用ransac算法筛选暴力匹配结果
 	ransac(good_min, keypoints1, keypoints2, good_ransac);
 	cout << "good_matches.size=" << good_ransac.size() << endl;
+	
 	Mat  outimg;
-	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, good_ransac, outimg);
-	imshow("ransac算法筛选暴力匹配结果", outimg);
+	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, good_ransac, outimg, 
+		        cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+	
 
 	/********相似三角形测距法 计算距离*******/
 	double B = sqrt(T.at<double>(0, 0) * T.at<double>(0, 0) + T.at<double>(1, 0) * T.at<double>(1, 0) + T.at<double>(2, 0) * T.at<double>(2, 0));
 	double f = Q.at<double>(2, 3);
 	double avr_dis = 0;
 	double max_dis = LONG_MIN, min_dis = LONG_MAX;
+	Point origin;
 	cout << "f = " << f << endl;
 	cout << "B = " << B << endl;
 	cout << "********************************************" << endl;
@@ -250,13 +251,15 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	{
 		double x_L = keypoints1[good_min[i].queryIdx].pt.x;
 		double x_R = keypoints2[good_min[i].trainIdx].pt.x;
+		origin.x = keypoints1[good_min[i].queryIdx].pt.x;
+		origin.y = keypoints1[good_min[i].queryIdx].pt.y;
 
+		putText(outimg, to_string(good_min[i].queryIdx), origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0, 0, 255), 1);
 		double distance = f * B / abs(x_L - x_R);
-		//cout << "x_L = " << x_L << endl;
-		//cout << "x_R = " << x_R << endl;
-		cout << "距离为: " << distance << " mm" << endl;
+		
+		cout << to_string(good_min[i].queryIdx)<< " 点的x坐标为: " << x_L<<" 求得的距离为： "<< distance << " mm" << endl;
 	}
-
+	imshow("ransac算法筛选暴力匹配结果", outimg);
 
 	return true;
 }
