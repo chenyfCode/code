@@ -11,50 +11,37 @@ using namespace cv;
 using namespace std;
 
 //***************************参数以及初始化******************************//
+//Matlab和OpenCV进行相机标定得到的参数矩阵全是互为转置的!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // 用于检测深度的图像
 const char* imageName_R = "../Images/1206-8mm-2602mm/B0.png";
-const char* stereoRectifyParams = "stereoRectifyParams.txt"; // 存放立体校正参数
+const char* stereoRectifyParams = "./image/stereoRectifyParams.txt"; // 存放立体校正参数
 
-
-Mat cameraMatrix_L = (cv::Mat_<float>(3, 3) << 1781.810262887706, 0, 604.4243823452152,
-	                                           0, 1780.163208758555, 493.8393294388836,
-	                                           0, 0, 1); // 左相机的内参数
-Mat cameraMatrix_R = (cv::Mat_<float>(3, 3) << 1763.816741031971, 0, 617.9243882089885,
-	                                           0, 1763.387847013527, 474.5017098333396,
-	                                           0, 0, 1); // 右相机的内参数
-//左右相机畸变系数
-Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.08572684461447769, 0.2389193416004575, -0.004663266549834569, 0.0009870654966580672, -0.4788910294243767); // 左相机的畸变系数
-Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.07700464555060682, 0.2205726466952272, -0.004163407776421812, 0.0004392279361322822, -1.019433830263017);// 右相机的畸变系数
+Mat cameraMatrix_L = (cv::Mat_<float>(3, 3) << 1758.77667720632, 0.279226745063228, 625.625946148216,
+	0, 1757.99844199530, 507.107936794840,
+	0, 0, 1); // 左相机的内参数
+Mat cameraMatrix_R = (cv::Mat_<float>(3, 3) << 1755.14940547475, 0.501649912236977, 631.214991270194,
+	0, 1754.27796470277, 482.534096146445,
+	0, 0, 1); // 右相机的内参数
+//左右相机畸变系数 最后一个参数置0的话效果不一样
+Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.0934954931685911, 0.326306912697088, 3.45466701643577e-05, -0.000318033085229932, -0.525344303444370); // 左相机的畸变系数
+Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.0848605945510993, 0.212305665934113, -0.000585145907633591, -0.000718899576042846, -0.0908279577541819);// 右相机的畸变系数
 //旋转矩阵
-Mat R = (cv::Mat_<double>(3, 3) << 0.9990386966449903, -0.02052550993291603, 0.03873481699805289,
-	0.01953812902031574, 0.9994787634885305, 0.02569947178102284,
-	-0.03924212176048051, -0.02491796094049147, 0.9989189912612052);
+Mat R = (cv::Mat_<double>(3, 3) << 0.998950576820749, -0.0214417692637061, 0.0404361389225034,
+	0.0202157170894231, 0.999330628013878, 0.0304896817948001,
+	-0.0410628248258496, -0.0296402841455635, 0.998716825718428);
+
 //平移矩阵
-Mat T = (cv::Mat_<double>(3, 1) << -188.4484020648055,
-	3.018669006556458,
-	-12.35880046938432);
-//本征矩阵
-Mat E = (cv::Mat_<float>(3, 3) << 0.1230088613972923, 12.27713953494406, 3.333020442891075,
-	-19.74203505242429, -4.442079240155581, 187.7659718208645,
-	-6.697696343127296, -188.288216156443, -4.959951982589974);
-//基础矩阵
-Mat F = (cv::Mat_<float>(3, 3) << -1.273661393890549e-08, -1.27237876738228e-06, 2.113126071972925e-05,
-	2.044631852033703e-06, 4.604803897836992e-07, -0.03611309382934646,
-	0.0002608862176085383, 0.03498654290771176, 1);
+Mat T = (cv::Mat_<double>(3, 1) << -181.536578507112,
+	0.126450133817349,
+	4.80301053133881);
 // 图像尺寸
-Size imageSize(1280,1024);
-
-
+Size imageSize(1280, 1024);
 
 Mat R1, R2, P1, P2, Q; // 立体校正参数
 Mat mapl1, mapl2, mapr1, mapr2; // 图像重投影映射表
 Mat img1_rectified, img2_rectified, result3DImage; // 校正图像  深度图
-
 Rect validRoi[2];
-
-
-
 
 
 //计算汉明距离
@@ -176,18 +163,18 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	Mat canRight = canvas(Rect(imageSize.width, 0, imageSize.width, imageSize.height));
 	gray_img1.copyTo(canLeft);
 	gray_img2.copyTo(canRight);
-	imwrite("校正前左右相机图像.jpg", canvas);
+	imwrite("./image/校正前左右相机图像.jpg", canvas);
 	remap(gray_img1, img1_rectified, mapl1, mapl2, INTER_LINEAR);
 	remap(gray_img2, img2_rectified, mapr1, mapr2, INTER_LINEAR);
-	imwrite("左相机校正图像.jpg", img1_rectified);
-	imwrite("右相机校正图像.jpg", img2_rectified);
+	imwrite("./image/左相机校正图像.jpg", img1_rectified);
+	imwrite("./image/右相机校正图像.jpg", img2_rectified);
 	img1_rectified.copyTo(canLeft);
 	img2_rectified.copyTo(canRight);
 	rectangle(canLeft, validRoi[0], Scalar(255, 255, 255), 5, 8);
 	rectangle(canRight, validRoi[1], Scalar(255, 255, 255), 5, 8);
 	for (int j = 0; j <= canvas.rows; j += 16)
 		line(canvas, Point(0, j), Point(canvas.cols, j), Scalar(0, 255, 0), 1, 8);
-	imwrite("校正后左右相机图像.jpg", canvas);
+	imwrite("./image/校正后左右相机图像.jpg", canvas);
 
 
 	// 进行SIFT特征点提取与匹配
@@ -224,7 +211,7 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	cv::Mat img_matches_bf;
 	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, matches, img_matches_bf);
 	imshow("暴力匹配", img_matches_bf);
-
+	imwrite("./image/暴力匹配.jpg", img_matches_bf);
 	vector<DMatch>  good_min, good_ransac;
 	//最小汉明距离筛选暴力匹配结果
 	match_min(matches, good_min);
@@ -260,7 +247,7 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 		cout << to_string(good_min[i].queryIdx)<< " 点的x坐标为: " << x_L<<" 求得的距离为： "<< distance << " mm" << endl;
 	}
 	imshow("ransac算法筛选暴力匹配结果", outimg);
-
+	imwrite("./image/ransac算法筛选暴力匹配结果.jpg", outimg);
 	return true;
 }
 
