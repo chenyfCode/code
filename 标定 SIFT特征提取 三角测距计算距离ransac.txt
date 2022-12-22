@@ -368,10 +368,10 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	cout << "f = " << f << endl;
 	cout << "B = " << B << endl;
 	cout << "********************************************" << endl;
-	for (int i = 0; i < good_min.size(); i++)
+	for (int i = 0; i < good_ransac.size(); i++)
 	{
-		double x_L = keypoints1[good_min[i].queryIdx].pt.x;
-		double x_R = keypoints2[good_min[i].trainIdx].pt.x;
+		double x_L = keypoints1[good_ransac[i].queryIdx].pt.x;
+		double x_R = keypoints2[good_ransac[i].trainIdx].pt.x;
 
 		double distance = f * B / abs(x_L - x_R);
 		//cout << "x_L = " << x_L << endl;

@@ -219,11 +219,11 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	//用ransac算法筛选暴力匹配结果
 	ransac(good_min, keypoints1, keypoints2, good_ransac);
 	cout << "good_matches.size=" << good_ransac.size() << endl;
-	
+
 	Mat  outimg;
-	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, good_ransac, outimg, 
-		        cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-	
+	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, good_ransac, outimg,
+		cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+
 
 	/********相似三角形测距法 计算距离*******/
 	double B = sqrt(T.at<double>(0, 0) * T.at<double>(0, 0) + T.at<double>(1, 0) * T.at<double>(1, 0) + T.at<double>(2, 0) * T.at<double>(2, 0));
@@ -234,17 +234,17 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	cout << "f = " << f << endl;
 	cout << "B = " << B << endl;
 	cout << "********************************************" << endl;
-	for (int i = 0; i < good_min.size(); i++)
+	for (int i = 0; i < good_ransac.size(); i++)
 	{
-		double x_L = keypoints1[good_min[i].queryIdx].pt.x;
-		double x_R = keypoints2[good_min[i].trainIdx].pt.x;
-		origin.x = keypoints1[good_min[i].queryIdx].pt.x;
-		origin.y = keypoints1[good_min[i].queryIdx].pt.y;
+		double x_L = keypoints1[good_ransac[i].queryIdx].pt.x;
+		double x_R = keypoints2[good_ransac[i].trainIdx].pt.x;
+		origin.x = keypoints1[good_ransac[i].queryIdx].pt.x;
+		origin.y = keypoints1[good_ransac[i].queryIdx].pt.y;
 
-		putText(outimg, to_string(good_min[i].queryIdx), origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0, 0, 255), 1);
+		putText(outimg, to_string(good_ransac[i].queryIdx), origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0, 0, 255), 1);
 		double distance = f * B / abs(x_L - x_R);
-		
-		cout << to_string(good_min[i].queryIdx)<< " 点的x坐标为: " << x_L<<" 求得的距离为： "<< distance << " mm" << endl;
+
+		cout << to_string(good_ransac[i].queryIdx) << " 点的x坐标为: " << x_L << " 求得的距离为： " << distance << " mm" << endl;
 	}
 	imshow("ransac算法筛选暴力匹配结果", outimg);
 	imwrite("./image/ransac算法筛选暴力匹配结果.jpg", outimg);
