@@ -1,4 +1,4 @@
-//±ê¶¨¡¢Ğ£Õı¡¢SIFTÆ¥Åä¡¢²â¾à
+//æ ‡å®šã€æ ¡æ­£ã€SIFTåŒ¹é…ã€æµ‹è·
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -10,40 +10,40 @@
 using namespace cv;
 using namespace std;
 
-//***************************²ÎÊıÒÔ¼°³õÊ¼»¯******************************//
-//MatlabºÍOpenCV½øĞĞÏà»ú±ê¶¨µÃµ½µÄ²ÎÊı¾ØÕóÈ«ÊÇ»¥Îª×ªÖÃµÄ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//***************************å‚æ•°ä»¥åŠåˆå§‹åŒ–******************************//
+//Matlabå’ŒOpenCVè¿›è¡Œç›¸æœºæ ‡å®šå¾—åˆ°çš„å‚æ•°çŸ©é˜µå…¨æ˜¯äº’ä¸ºè½¬ç½®çš„!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // ÓÃÓÚ¼ì²âÉî¶ÈµÄÍ¼Ïñ
+const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // ç”¨äºæ£€æµ‹æ·±åº¦çš„å›¾åƒ
 const char* imageName_R = "../Images/1206-8mm-2602mm/B0.png";
-const char* stereoRectifyParams = "./image/stereoRectifyParams.txt"; // ´æ·ÅÁ¢ÌåĞ£Õı²ÎÊı
+const char* stereoRectifyParams = "./image/stereoRectifyParams.txt"; // å­˜æ”¾ç«‹ä½“æ ¡æ­£å‚æ•°
 
 Mat cameraMatrix_L = (cv::Mat_<float>(3, 3) << 1758.77667720632, 0.279226745063228, 625.625946148216,
 	0, 1757.99844199530, 507.107936794840,
-	0, 0, 1); // ×óÏà»úµÄÄÚ²ÎÊı
+	0, 0, 1); // å·¦ç›¸æœºçš„å†…å‚æ•°
 Mat cameraMatrix_R = (cv::Mat_<float>(3, 3) << 1755.14940547475, 0.501649912236977, 631.214991270194,
 	0, 1754.27796470277, 482.534096146445,
-	0, 0, 1); // ÓÒÏà»úµÄÄÚ²ÎÊı
-//×óÓÒÏà»ú»û±äÏµÊı ×îºóÒ»¸ö²ÎÊıÖÃ0µÄ»°Ğ§¹û²»Ò»Ñù
-Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.0934954931685911, 0.326306912697088, 3.45466701643577e-05, -0.000318033085229932, -0.525344303444370); // ×óÏà»úµÄ»û±äÏµÊı
-Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.0848605945510993, 0.212305665934113, -0.000585145907633591, -0.000718899576042846, -0.0908279577541819);// ÓÒÏà»úµÄ»û±äÏµÊı
-//Ğı×ª¾ØÕó
+	0, 0, 1); // å³ç›¸æœºçš„å†…å‚æ•°
+//å·¦å³ç›¸æœºç•¸å˜ç³»æ•° æœ€åä¸€ä¸ªå‚æ•°ç½®0çš„è¯æ•ˆæœä¸ä¸€æ ·
+Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.0934954931685911, 0.326306912697088, 3.45466701643577e-05, -0.000318033085229932, -0.525344303444370); // å·¦ç›¸æœºçš„ç•¸å˜ç³»æ•°
+Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.0848605945510993, 0.212305665934113, -0.000585145907633591, -0.000718899576042846, -0.0908279577541819);// å³ç›¸æœºçš„ç•¸å˜ç³»æ•°
+//æ—‹è½¬çŸ©é˜µ
 Mat R = (cv::Mat_<double>(3, 3) << 0.998950576820749, -0.0214417692637061, 0.0404361389225034,
 	0.0202157170894231, 0.999330628013878, 0.0304896817948001,
 	-0.0410628248258496, -0.0296402841455635, 0.998716825718428);
 
-//Æ½ÒÆ¾ØÕó
+//å¹³ç§»çŸ©é˜µ
 Mat T = (cv::Mat_<double>(3, 1) << -181.536578507112,
 	0.126450133817349,
 	4.80301053133881);
-// Í¼Ïñ³ß´ç
+// å›¾åƒå°ºå¯¸
 Size imageSize(1280, 1024);
 
-Mat R1, R2, P1, P2, Q; // Á¢ÌåĞ£Õı²ÎÊı
-Mat mapl1, mapl2, mapr1, mapr2; // Í¼ÏñÖØÍ¶Ó°Ó³Éä±í
-Mat img1_rectified, img2_rectified, result3DImage; // Ğ£ÕıÍ¼Ïñ  Éî¶ÈÍ¼
+Mat R1, R2, P1, P2, Q; // ç«‹ä½“æ ¡æ­£å‚æ•°
+Mat mapl1, mapl2, mapr1, mapr2; // å›¾åƒé‡æŠ•å½±æ˜ å°„è¡¨
+Mat img1_rectified, img2_rectified, result3DImage; // æ ¡æ­£å›¾åƒ  æ·±åº¦å›¾
 Rect validRoi[2];
 
-//¼ÆËãººÃ÷¾àÀë
+//è®¡ç®—æ±‰æ˜è·ç¦»
 void match_min(vector<DMatch> matches, vector<DMatch>& good_matches)
 {
 	double min_dist = 10000, max_dist = 0;
@@ -61,24 +61,24 @@ void match_min(vector<DMatch> matches, vector<DMatch>& good_matches)
 			good_matches.push_back(matches[i]);
 }
 
-//RANSACËã·¨ÊµÏÖ
+//RANSACç®—æ³•å®ç°
 void ransac(vector<DMatch> matches, vector<KeyPoint> queryKeyPoint, vector<KeyPoint> trainKeyPoint, vector<DMatch>& matches_ransac)
 {
-	//¶¨Òå±£´æÆ¥Åäµã¶Ô×ø±ê
+	//å®šä¹‰ä¿å­˜åŒ¹é…ç‚¹å¯¹åæ ‡
 	vector<Point2f> srcPoints(matches.size()), dstPoints(matches.size());
-	//±£´æ´Ó¹Ø¼üµãÖĞÌáÈ¡µ½µÄÆ¥Åäµã¶ÔµÄ×ø±ê
+	//ä¿å­˜ä»å…³é”®ç‚¹ä¸­æå–åˆ°çš„åŒ¹é…ç‚¹å¯¹çš„åæ ‡
 	for (int i = 0; i < matches.size(); i++)
 	{
 		srcPoints[i] = queryKeyPoint[matches[i].queryIdx].pt;
 		dstPoints[i] = trainKeyPoint[matches[i].trainIdx].pt;
 	}
 
-	//Æ¥Åäµã¶Ô½øĞĞRANSAC¹ıÂË
+	//åŒ¹é…ç‚¹å¯¹è¿›è¡ŒRANSACè¿‡æ»¤
 	vector<int> inliersMask(srcPoints.size());
 	//Mat homography;
 	//homography = findHomography(srcPoints, dstPoints, RANSAC, 5, inliersMask);
 	findHomography(srcPoints, dstPoints, RANSAC, 5, inliersMask);
-	//ÊÖ¶¯µÄ±£ÁôRANSAC¹ıÂËºóµÄÆ¥Åäµã¶Ô
+	//æ‰‹åŠ¨çš„ä¿ç•™RANSACè¿‡æ»¤åçš„åŒ¹é…ç‚¹å¯¹
 	for (int i = 0; i < inliersMask.size(); i++)
 		if (inliersMask[i])
 			matches_ransac.push_back(matches[i]);
@@ -87,18 +87,18 @@ void ransac(vector<DMatch> matches, vector<KeyPoint> queryKeyPoint, vector<KeyPo
 
 
 /*
-Á¢ÌåĞ£Õı
-²ÎÊı£º
-	stereoRectifyParams	´æ·ÅÁ¢ÌåĞ£Õı½á¹ûµÄtxt
-	cameraMatrix			Ïà»úÄÚ²ÎÊı
-	distCoeffs				Ïà»ú»û±äÏµÊı
-	imageSize				Í¼Ïñ³ß´ç
-	R						×óÓÒÏà»úÏà¶ÔµÄĞı×ª¾ØÕó
-	T						×óÓÒÏà»úÏà¶ÔµÄÆ½ÒÆÏòÁ¿
-	R1, R2					ĞĞ¶ÔÆëĞı×ªĞ£Õı
-	P1, P2					×óÓÒÍ¶Ó°¾ØÕó
-	Q						ÖØÍ¶Ó°¾ØÕó
-	map1, map2				ÖØÍ¶Ó°Ó³Éä±í
+ç«‹ä½“æ ¡æ­£
+å‚æ•°ï¼š
+	stereoRectifyParams	å­˜æ”¾ç«‹ä½“æ ¡æ­£ç»“æœçš„txt
+	cameraMatrix			ç›¸æœºå†…å‚æ•°
+	distCoeffs				ç›¸æœºç•¸å˜ç³»æ•°
+	imageSize				å›¾åƒå°ºå¯¸
+	R						å·¦å³ç›¸æœºç›¸å¯¹çš„æ—‹è½¬çŸ©é˜µ
+	T						å·¦å³ç›¸æœºç›¸å¯¹çš„å¹³ç§»å‘é‡
+	R1, R2					è¡Œå¯¹é½æ—‹è½¬æ ¡æ­£
+	P1, P2					å·¦å³æŠ•å½±çŸ©é˜µ
+	Q						é‡æŠ•å½±çŸ©é˜µ
+	map1, map2				é‡æŠ•å½±æ˜ å°„è¡¨
 */
 
 Rect stereoRectification(const char* stereoRectifyParams, Mat& cameraMatrix1, Mat& distCoeffs1, Mat& cameraMatrix2, Mat& distCoeffs2,
@@ -108,16 +108,16 @@ Rect stereoRectification(const char* stereoRectifyParams, Mat& cameraMatrix1, Ma
 	ofstream stereoStore(stereoRectifyParams);
 	stereoRectify(cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, imageSize,
 		R, T, R1, R2, P1, P2, Q, CALIB_ZERO_DISPARITY, 0, imageSize, &validRoi[0], &validRoi[1]);
-	// ¼ÆËã×óÓÒÍ¼ÏñµÄÖØÍ¶Ó°Ó³Éä±í
-	stereoStore << "R1£º" << endl;
+	// è®¡ç®—å·¦å³å›¾åƒçš„é‡æŠ•å½±æ˜ å°„è¡¨
+	stereoStore << "R1ï¼š" << endl;
 	stereoStore << R1 << endl;
-	stereoStore << "R2£º" << endl;
+	stereoStore << "R2ï¼š" << endl;
 	stereoStore << R2 << endl;
-	stereoStore << "P1£º" << endl;
+	stereoStore << "P1ï¼š" << endl;
 	stereoStore << P1 << endl;
-	stereoStore << "P2£º" << endl;
+	stereoStore << "P2ï¼š" << endl;
 	stereoStore << P2 << endl;
-	stereoStore << "Q£º" << endl;
+	stereoStore << "Qï¼š" << endl;
 	stereoStore << Q << endl;
 	stereoStore.close();
 	cout << "R1:" << endl;
@@ -136,65 +136,65 @@ Rect stereoRectification(const char* stereoRectifyParams, Mat& cameraMatrix1, Ma
 }
 
 /*
-¼ÆËãÊÓ²îÍ¼
-²ÎÊı£º
-	imageName1	×óÏà»úÅÄÉãµÄÍ¼Ïñ
-	imageName2	ÓÒÏà»úÅÄÉãµÄÍ¼Ïñ
-	img1_rectified	ÖØÓ³ÉäºóµÄ×ó²àÏà»úÍ¼Ïñ
-	img2_rectified	ÖØÓ³ÉäºóµÄÓÒ²àÏà»úÍ¼Ïñ
-	map	ÖØÍ¶Ó°Ó³Éä±í
+è®¡ç®—è§†å·®å›¾
+å‚æ•°ï¼š
+	imageName1	å·¦ç›¸æœºæ‹æ‘„çš„å›¾åƒ
+	imageName2	å³ç›¸æœºæ‹æ‘„çš„å›¾åƒ
+	img1_rectified	é‡æ˜ å°„åçš„å·¦ä¾§ç›¸æœºå›¾åƒ
+	img2_rectified	é‡æ˜ å°„åçš„å³ä¾§ç›¸æœºå›¾åƒ
+	map	é‡æŠ•å½±æ˜ å°„è¡¨
 */
 bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& img1_rectified,
 	Mat& img2_rectified, Mat& mapl1, Mat& mapl2, Mat& mapr1, Mat& mapr2, Rect validRoi[2])
 {
-	// Ê×ÏÈ£¬¶Ô×óÓÒÏà»úµÄÁ½ÕÅÍ¼Æ¬½øĞĞÖØ¹¹
+	// é¦–å…ˆï¼Œå¯¹å·¦å³ç›¸æœºçš„ä¸¤å¼ å›¾ç‰‡è¿›è¡Œé‡æ„
 	Mat img1 = imread(imageName1);
 	Mat img2 = imread(imageName2);
 	if (img1.empty() | img2.empty())
 	{
-		cout << "Í¼ÏñÎª¿Õ" << endl;
+		cout << "å›¾åƒä¸ºç©º" << endl;
 	}
 	Mat gray_img1, gray_img2;
 	cvtColor(img1, gray_img1, COLOR_BGR2GRAY);
 	cvtColor(img2, gray_img2, COLOR_BGR2GRAY);
-	Mat canvas(imageSize.height, imageSize.width * 2, CV_8UC1); // ×¢ÒâÊı¾İÀàĞÍ
+	Mat canvas(imageSize.height, imageSize.width * 2, CV_8UC1); // æ³¨æ„æ•°æ®ç±»å‹
 	Mat canLeft = canvas(Rect(0, 0, imageSize.width, imageSize.height));
 	Mat canRight = canvas(Rect(imageSize.width, 0, imageSize.width, imageSize.height));
 	gray_img1.copyTo(canLeft);
 	gray_img2.copyTo(canRight);
-	imwrite("./image/Ğ£ÕıÇ°×óÓÒÏà»úÍ¼Ïñ.jpg", canvas);
+	imwrite("./image/æ ¡æ­£å‰å·¦å³ç›¸æœºå›¾åƒ.jpg", canvas);
 	remap(gray_img1, img1_rectified, mapl1, mapl2, INTER_LINEAR);
 	remap(gray_img2, img2_rectified, mapr1, mapr2, INTER_LINEAR);
-	imwrite("./image/×óÏà»úĞ£ÕıÍ¼Ïñ.jpg", img1_rectified);
-	imwrite("./image/ÓÒÏà»úĞ£ÕıÍ¼Ïñ.jpg", img2_rectified);
+	imwrite("./image/å·¦ç›¸æœºæ ¡æ­£å›¾åƒ.jpg", img1_rectified);
+	imwrite("./image/å³ç›¸æœºæ ¡æ­£å›¾åƒ.jpg", img2_rectified);
 	img1_rectified.copyTo(canLeft);
 	img2_rectified.copyTo(canRight);
 	rectangle(canLeft, validRoi[0], Scalar(255, 255, 255), 5, 8);
 	rectangle(canRight, validRoi[1], Scalar(255, 255, 255), 5, 8);
 	for (int j = 0; j <= canvas.rows; j += 16)
 		line(canvas, Point(0, j), Point(canvas.cols, j), Scalar(0, 255, 0), 1, 8);
-	imwrite("./image/Ğ£Õıºó×óÓÒÏà»úÍ¼Ïñ.jpg", canvas);
+	imwrite("./image/æ ¡æ­£åå·¦å³ç›¸æœºå›¾åƒ.jpg", canvas);
 
-	//Harris½Çµã
+	//Harrisè§’ç‚¹
 	Mat outimg1, outimg2;
-	//Harris½Çµã¼ì²â
+	//Harrisè§’ç‚¹æ£€æµ‹
 	cornerHarris(img1_rectified, outimg1, 3, 3, 0.01);
 	cornerHarris(img2_rectified, outimg2, 3, 3, 0.01);
 
-	//¶şÖµ»¯ÏÔÊ¾
+	//äºŒå€¼åŒ–æ˜¾ç¤º
 	//threshold(outimg1, outimg1, 0.0001, 255, THRESH_BINARY);
 	//threshold(outimg2, outimg2, 0.0001, 255, THRESH_BINARY);
 	//imshow("outimg1", outimg1);
 	//imshow("outimg2", outimg2);
 
-	//¹éÒ»»¯±ãÓÚ½øĞĞÊıÖµ±È½ÏºÍ½á¹ûÏÔÊ¾
+	//å½’ä¸€åŒ–ä¾¿äºè¿›è¡Œæ•°å€¼æ¯”è¾ƒå’Œç»“æœæ˜¾ç¤º
 	normalize(outimg1, outimg1, 0, 255, NORM_MINMAX);
 	normalize(outimg2, outimg2, 0, 255, NORM_MINMAX);
-	//½«Í¼ÏñµÄÊı¾İÀàĞÍ±ä³ÉCV_8U
+	//å°†å›¾åƒçš„æ•°æ®ç±»å‹å˜æˆCV_8U
 	convertScaleAbs(outimg1, outimg1);
 	convertScaleAbs(outimg2, outimg2);
 
-	//Ñ°ÕÒHarris½Çµã
+	//å¯»æ‰¾Harrisè§’ç‚¹
 	vector<KeyPoint> keypoints1, keypoints2;
 	for (int row = 0; row < outimg1.rows; row++)
 	{
@@ -203,7 +203,7 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 			int R = outimg1.at<uchar>(row, col);
 			if (R > 125)
 			{
-				//Ïò½Çµã´æÈëKeyPointÖĞ
+				//å‘è§’ç‚¹å­˜å…¥KeyPointä¸­
 				KeyPoint keyPoint;
 				keyPoint.pt.y = row;
 				keyPoint.pt.x = col;
@@ -219,7 +219,7 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 			int R = outimg2.at<uchar>(row, col);
 			if (R > 125)
 			{
-				//Ïò½Çµã´æÈëKeyPointÖĞ
+				//å‘è§’ç‚¹å­˜å…¥KeyPointä¸­
 				KeyPoint keyPoint;
 				keyPoint.pt.y = row;
 				keyPoint.pt.x = col;
@@ -228,16 +228,16 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 		}
 	}
 
-	//»æÖÆ½ÇµãÓëÏÔÊ¾½á¹û
+	//ç»˜åˆ¶è§’ç‚¹ä¸æ˜¾ç¤ºç»“æœ
 	drawKeypoints(img1_rectified, keypoints1, img1_rectified);
-	imshow("ÏµÊı¾ØÕó1", outimg1);
-	imshow("Harris½Çµã1", img1_rectified);
+	imshow("ç³»æ•°çŸ©é˜µ1", outimg1);
+	imshow("Harrisè§’ç‚¹1", img1_rectified);
 
 	drawKeypoints(img2_rectified, keypoints2, img2_rectified);
-	imshow("ÏµÊı¾ØÕó2", outimg2);
-	imshow("Harris½Çµã2", img2_rectified);
+	imshow("ç³»æ•°çŸ©é˜µ2", outimg2);
+	imshow("Harrisè§’ç‚¹2", img2_rectified);
 
-	//Harris½ÇµãÆ¥Åä
+	//Harrisè§’ç‚¹åŒ¹é…
 	Ptr<ORB> Harris_orb = ORB::create(1000, 1.2f);
 	Mat descriptors1, descriptors2;
 	Harris_orb->compute(img1_rectified, keypoints1, descriptors1);
@@ -245,22 +245,22 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 
 	
 	
-	// 4. ÌØÕ÷Æ¥Åä
+	// 4. ç‰¹å¾åŒ¹é…
 	cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE);
-	//  Ö±½Ó±©Á¦Æ¥Åä
+	//  ç›´æ¥æš´åŠ›åŒ¹é…
 	std::vector<cv::DMatch> matches;
 	matcher->match(descriptors1, descriptors2, matches);
-	// »­Æ¥ÅäÍ¼
+	// ç”»åŒ¹é…å›¾
 	cv::Mat img_matches_bf;
 	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, matches, img_matches_bf);
-	imshow("±©Á¦Æ¥Åä", img_matches_bf);
-	imwrite("./image/±©Á¦Æ¥Åä.jpg", img_matches_bf);
+	imshow("æš´åŠ›åŒ¹é…", img_matches_bf);
+	imwrite("./image/æš´åŠ›åŒ¹é….jpg", img_matches_bf);
 	
 	vector<DMatch>  good_min, good_ransac;
-	//×îĞ¡ººÃ÷¾àÀëÉ¸Ñ¡±©Á¦Æ¥Åä½á¹û
+	//æœ€å°æ±‰æ˜è·ç¦»ç­›é€‰æš´åŠ›åŒ¹é…ç»“æœ
 	match_min(matches, good_min);
 	cout << "good_min=" << good_min.size() << endl;
-	//ÓÃransacËã·¨É¸Ñ¡±©Á¦Æ¥Åä½á¹û
+	//ç”¨ransacç®—æ³•ç­›é€‰æš´åŠ›åŒ¹é…ç»“æœ
 	ransac(good_min, keypoints1, keypoints2, good_ransac);
 	cout << "good_matches.size=" << good_ransac.size() << endl;
 
@@ -270,9 +270,9 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 
 	drawMatches(img1_rectified, keypoints1, img2_rectified, keypoints2, good_min, oooo,
 		cv::Scalar::all(-1), cv::Scalar::all(-1), vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-	imshow("×îĞ¡ººÃ÷¾àÀëÉ¸Ñ¡±©Á¦Æ¥Åä½á¹û", oooo);
+	imshow("æœ€å°æ±‰æ˜è·ç¦»ç­›é€‰æš´åŠ›åŒ¹é…ç»“æœ", oooo);
 
-	/********ÏàËÆÈı½ÇĞÎ²â¾à·¨ ¼ÆËã¾àÀë*******/
+	/********ç›¸ä¼¼ä¸‰è§’å½¢æµ‹è·æ³• è®¡ç®—è·ç¦»*******/
 	
 	double B = sqrt(T.at<double>(0, 0) * T.at<double>(0, 0) + T.at<double>(1, 0) * T.at<double>(1, 0) + T.at<double>(2, 0) * T.at<double>(2, 0));
 	double f = Q.at<double>(2, 3);
@@ -292,15 +292,15 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 		putText(outimg3, to_string(good_ransac[i].queryIdx), origin, cv::FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0, 0, 255), 1);
 		double distance = f * B / abs(x_L - x_R);
 
-		cout << to_string(good_ransac[i].queryIdx) << " µãµÄx×ø±êÎª: " << x_L << " ÇóµÃµÄ¾àÀëÎª£º " << distance << " mm" << endl;
+		cout << to_string(good_ransac[i].queryIdx) << " ç‚¹çš„xåæ ‡ä¸º: " << x_L << " æ±‚å¾—çš„è·ç¦»ä¸ºï¼š " << distance << " mm" << endl;
 	}
-	imshow("ransacËã·¨É¸Ñ¡±©Á¦Æ¥Åä½á¹û", outimg3);
-	imwrite("./image/ransacËã·¨É¸Ñ¡±©Á¦Æ¥Åä½á¹û.jpg", outimg3);
+	imshow("ransacç®—æ³•ç­›é€‰æš´åŠ›åŒ¹é…ç»“æœ", outimg3);
+	imwrite("./image/ransacç®—æ³•ç­›é€‰æš´åŠ›åŒ¹é…ç»“æœ.jpg", outimg3);
 	
 	return true;
 }
 
-// Êó±ê»Øµ÷º¯Êı£¬µã»÷ÊÓ²îÍ¼ÏÔÊ¾Éî¶È
+// é¼ æ ‡å›è°ƒå‡½æ•°ï¼Œç‚¹å‡»è§†å·®å›¾æ˜¾ç¤ºæ·±åº¦
 void onMouse(int event, int x, int y, int flags, void* param)
 {
 	Point point;
@@ -314,14 +314,14 @@ void onMouse(int event, int x, int y, int flags, void* param)
 
 int main()
 {
-	//½øĞĞÁ¢ÌåĞ£Õı
+	//è¿›è¡Œç«‹ä½“æ ¡æ­£
 	validRoi[0], validRoi[1] = stereoRectification(stereoRectifyParams, cameraMatrix_L, distCoeffs_L, cameraMatrix_R, distCoeffs_R,
 		imageSize, R, T, R1, R2, P1, P2, Q, mapl1, mapl2, mapr1, mapr2);
-	cout << "ÒÑ´´½¨Í¼ÏñÖØÍ¶Ó°Ó³Éä±í£¡" << endl;
-	//SIFTÌØÕ÷µãÌáÈ¡ÓëÆ¥Åä
+	cout << "å·²åˆ›å»ºå›¾åƒé‡æŠ•å½±æ˜ å°„è¡¨ï¼" << endl;
+	//SIFTç‰¹å¾ç‚¹æå–ä¸åŒ¹é…
 	computeDisparityImage(imageName_L, imageName_R, img1_rectified, img2_rectified, mapl1, mapl2, mapr1, mapr2, validRoi);
 
-	waitKey(0);  //µÈ´ı¼üÅÌÊäÈë
+	waitKey(0);  //ç­‰å¾…é”®ç›˜è¾“å…¥
 	return 0;
 }
 
