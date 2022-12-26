@@ -35,34 +35,34 @@ int main(void)
 	else {
 		img2.copyTo(img2gray);
 	}
-	//-- ³õÊ¼»¯HarrisLaplaceÌØÕ÷µã¼ì²â
+	//-- åˆå§‹åŒ–HarrisLaplaceç‰¹å¾ç‚¹æ£€æµ‹
 	Ptr<FeatureDetector> feature2D = xfeatures2d::HarrisLaplaceFeatureDetector::create();
-	//-- ³õÊ¼»¯SIFT ÌØÕ÷ÃèÊö×Ó																				  
+	//-- åˆå§‹åŒ–SIFT ç‰¹å¾æè¿°å­																				  
 	Ptr<DescriptorExtractor> descriptor2D = cv::SIFT::create();
 
-	//-- Step 1: ÌáÈ¡ÌØÕ÷µã
+	//-- Step 1: æå–ç‰¹å¾ç‚¹
 	vector<xfeatures2d::Elliptic_KeyPoint> aff_kpts1, aff_kpts2;
-	//-- ³õÊ¼»¯·ÂÉä²»±äÊı¾İÀà   feature2D: ÌØÕ÷µãÌáÈ¡·½Ê½  descriptor2D: ÃèÊö·ûÌáÈ¡·½Ê½
+	//-- åˆå§‹åŒ–ä»¿å°„ä¸å˜æ•°æ®ç±»   feature2D: ç‰¹å¾ç‚¹æå–æ–¹å¼  descriptor2D: æè¿°ç¬¦æå–æ–¹å¼
 	Ptr<xfeatures2d::AffineFeature2D> affineFeature2D = xfeatures2d::AffineFeature2D::create(feature2D, descriptor2D);
-	//-- ¼ì²â·ÂÉäÌØÕ÷µã
+	//-- æ£€æµ‹ä»¿å°„ç‰¹å¾ç‚¹
 	affineFeature2D->detect(img1gray, aff_kpts1);
 	affineFeature2D->detect(img2gray, aff_kpts2);
-	//-- ¼ì²âµ½µÄÌØÕ÷µã¼¯ĞÅÏ¢Êı¾İ½á¹¹ Elliptic_KeyPoint ×ª»» KeyPoint
+	//-- æ£€æµ‹åˆ°çš„ç‰¹å¾ç‚¹é›†ä¿¡æ¯æ•°æ®ç»“æ„ Elliptic_KeyPoint è½¬æ¢ KeyPoint
 	vector<KeyPoint> kpts1, kpts2;
 	convertEllipseKptsToStandardKpts(aff_kpts1, kpts1);
 	convertEllipseKptsToStandardKpts(aff_kpts2, kpts2);
 
-	//-- Step 2: ¼ÆËãÌØÕ÷µãÓëÃèÊö·û
+	//-- Step 2: è®¡ç®—ç‰¹å¾ç‚¹ä¸æè¿°ç¬¦
 	Mat desc1, desc2;
-	//-- »Ò¶ÈÍ¼ÏñÊäÈë¼ÆËãÌØÕ÷ÃèÊö·û   Èë²Î×îºótrue/false true±íÊ¾Íâ²¿Ìá¹©ÌØÕ÷µã(falseÔò±íÊ¾Ïà·´)
+	//-- ç°åº¦å›¾åƒè¾“å…¥è®¡ç®—ç‰¹å¾æè¿°ç¬¦   å…¥å‚æœ€åtrue/false trueè¡¨ç¤ºå¤–éƒ¨æä¾›ç‰¹å¾ç‚¹(falseåˆ™è¡¨ç¤ºç›¸å)
 	affineFeature2D->detectAndCompute(img1gray, Mat(), aff_kpts1, desc1, true);
 	affineFeature2D->detectAndCompute(img2gray, Mat(), aff_kpts2, desc2, true);
 
-	//-- Step 3: Æ¥ÅäÌØÕ÷ÃèÊö·û
+	//-- Step 3: åŒ¹é…ç‰¹å¾æè¿°ç¬¦
 	FlannBasedMatcher matcher;
 	vector<DMatch> matches;
 	matcher.match(desc1, desc2, matches);
-	//-- Step 4: Í¨¹ıVFCÒÆ³ı´íÎóÆ¥Åäµã¶Ô
+	//-- Step 4: é€šè¿‡VFCç§»é™¤é”™è¯¯åŒ¹é…ç‚¹å¯¹
 	vector<Point2f> X;  vector<Point2f> Y;
 	X.clear();   Y.clear();
 
@@ -87,13 +87,13 @@ int main(void)
 		int idx = matchIdx[i];
 		correctMatches.push_back(matches[idx]);
 	}
-	//-- »æÖÆÆ¥Åä½á¹ûÍ¼
+	//-- ç»˜åˆ¶åŒ¹é…ç»“æœå›¾
 	Mat img_Matches;
 	drawMatches(img1, kpts1, img2, kpts2, correctMatches, img_Matches, Scalar::all(-1), \
 		Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
 
-	imshow("Harris_FlannÆ¥Åä", img_Matches);
-	imwrite("./image/harrisAffineÆ¥Åä.png", img_Matches);
+	imshow("Harris_FlannåŒ¹é…", img_Matches);
+	imwrite("./image/harrisAffineåŒ¹é….png", img_Matches);
 	
 	waitKey(0);
 
@@ -103,7 +103,7 @@ int main(void)
 
 
 void draw_ellipse(Mat& image, vector<xfeatures2d::Elliptic_KeyPoint>& elliptic_keypoints, Mat& image_rgb)
-{   // ²ÊÉ«Í¼ÏñÉÏ½øĞĞÅĞ¶ÏÓë»æÖÆ
+{   // å½©è‰²å›¾åƒä¸Šè¿›è¡Œåˆ¤æ–­ä¸ç»˜åˆ¶
 	if (1 == image.channels()) {
 		image_rgb = Mat(Size(image.cols, image.rows), CV_8UC3);
 		cvtColor(image, image_rgb, COLOR_GRAY2BGR);
@@ -111,19 +111,19 @@ void draw_ellipse(Mat& image, vector<xfeatures2d::Elliptic_KeyPoint>& elliptic_k
 	else {
 		image.copyTo(image_rgb);
 	}
-	Point center; // ÖĞĞÄµã×ø±ê
-	Size axes;    // ÍÖÔ²³¤¶ÌÖá
-				  // ½øĞĞÌØÕ÷µãÍÖÔ²»æÖÆ
+	Point center; // ä¸­å¿ƒç‚¹åæ ‡
+	Size axes;    // æ¤­åœ†é•¿çŸ­è½´
+				  // è¿›è¡Œç‰¹å¾ç‚¹æ¤­åœ†ç»˜åˆ¶
 	for (int i = 0; i < elliptic_keypoints.size(); ++i)
 	{
 		center.x = elliptic_keypoints[i].pt.x;
 		center.y = elliptic_keypoints[i].pt.y;
 		axes.width = elliptic_keypoints[i].axes.width;
 		axes.height = elliptic_keypoints[i].axes.height;
-		double angle = elliptic_keypoints[i].angle;  // ½Ç¶È
-													 // »æÖÆÍÖÔ²Í¼Ïñ
+		double angle = elliptic_keypoints[i].angle;  // è§’åº¦
+													 // ç»˜åˆ¶æ¤­åœ†å›¾åƒ
 		ellipse(image_rgb, center, axes, angle * 180 / CV_PI, 0, 360, Scalar(255, 255, 255), 2, 8);
-		// »æÖÆÖĞĞÄµã×ø±ê
+		// ç»˜åˆ¶ä¸­å¿ƒç‚¹åæ ‡
 		circle(image_rgb, center, 1, Scalar(0, 0, 255));
 	}
 }
@@ -155,10 +155,10 @@ bool convertEllipseKptsToStandardKpts(const vector<xfeatures2d::Elliptic_KeyPoin
 //imwrite("adam_zoom1_front.png", img1s);
 //imwrite("adam_zoom1_65deg.png", img2s);
 
-//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::SURF::create();  // SURF ÌØÕ÷ÃèÊö×Ó
-//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::DAISY::create();  // DAISYÃèÊö×Ó
+//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::SURF::create();  // SURF ç‰¹å¾æè¿°å­
+//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::DAISY::create();  // DAISYæè¿°å­
 //Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::BoostDesc::create(); // Learning Image Descriptor with Boosting
-//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::FREAK::create();  // FREAKÃèÊö×Ó
-//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::BriefDescriptorExtractor::create(); //BRIEF ÃèÊö×Ó
-//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::LATCH::create(); // LATCH ÃèÊö×Ó
-//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::LUCID::create(); // LUCID ÃèÊö×Ó
+//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::FREAK::create();  // FREAKæè¿°å­
+//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::BriefDescriptorExtractor::create(); //BRIEF æè¿°å­
+//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::LATCH::create(); // LATCH æè¿°å­
+//Ptr<DescriptorExtractor> descriptor2D = xfeatures2d::LUCID::create(); // LUCID æè¿°å­
