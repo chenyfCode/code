@@ -1,4 +1,4 @@
-//±ê¶¨¡¢Ğ£Õı¡¢SIFTÆ¥Åä¡¢²â¾à
+//æ ‡å®šã€æ ¡æ­£ã€SIFTåŒ¹é…ã€æµ‹è·
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -13,53 +13,53 @@ using namespace cv;
 using namespace std;
 
 
-//***************************²ÎÊıÒÔ¼°³õÊ¼»¯******************************//
-//MatlabºÍOpenCV½øĞĞÏà»ú±ê¶¨µÃµ½µÄ²ÎÊı¾ØÕóÈ«ÊÇ»¥Îª×ªÖÃµÄ!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//***************************å‚æ•°ä»¥åŠåˆå§‹åŒ–******************************//
+//Matlabå’ŒOpenCVè¿›è¡Œç›¸æœºæ ‡å®šå¾—åˆ°çš„å‚æ•°çŸ©é˜µå…¨æ˜¯äº’ä¸ºè½¬ç½®çš„!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // ÓÃÓÚ¼ì²âÉî¶ÈµÄÍ¼Ïñ
+const char* imageName_L = "../Images/1206-8mm-2602mm/A0.png"; // ç”¨äºæ£€æµ‹æ·±åº¦çš„å›¾åƒ
 const char* imageName_R = "../Images/1206-8mm-2602mm/B0.png";
-const char* stereoRectifyParams = "./image/stereoRectifyParams.txt"; // ´æ·ÅÁ¢ÌåĞ£Õı²ÎÊı
+const char* stereoRectifyParams = "./image/stereoRectifyParams.txt"; // å­˜æ”¾ç«‹ä½“æ ¡æ­£å‚æ•°
 
 Mat cameraMatrix_L = (cv::Mat_<float>(3, 3) << 1758.77667720632, 0.279226745063228, 625.625946148216,
 	0, 1757.99844199530, 507.107936794840,
-	0, 0, 1); // ×óÏà»úµÄÄÚ²ÎÊı
+	0, 0, 1); // å·¦ç›¸æœºçš„å†…å‚æ•°
 Mat cameraMatrix_R = (cv::Mat_<float>(3, 3) << 1755.14940547475, 0.501649912236977, 631.214991270194,
 	0, 1754.27796470277, 482.534096146445,
-	0, 0, 1); // ÓÒÏà»úµÄÄÚ²ÎÊı
-//×óÓÒÏà»ú»û±äÏµÊı ×îºóÒ»¸ö²ÎÊıÖÃ0µÄ»°Ğ§¹û²»Ò»Ñù
-Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.0934954931685911, 0.326306912697088, 3.45466701643577e-05, -0.000318033085229932, -0.525344303444370); // ×óÏà»úµÄ»û±äÏµÊı
-Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.0848605945510993, 0.212305665934113, -0.000585145907633591, -0.000718899576042846, -0.0908279577541819);// ÓÒÏà»úµÄ»û±äÏµÊı
-//Ğı×ª¾ØÕó
+	0, 0, 1); // å³ç›¸æœºçš„å†…å‚æ•°
+//å·¦å³ç›¸æœºç•¸å˜ç³»æ•° æœ€åä¸€ä¸ªå‚æ•°ç½®0çš„è¯æ•ˆæœä¸ä¸€æ ·
+Mat distCoeffs_L = (Mat_<float>(1, 5) << -0.0934954931685911, 0.326306912697088, 3.45466701643577e-05, -0.000318033085229932, -0.525344303444370); // å·¦ç›¸æœºçš„ç•¸å˜ç³»æ•°
+Mat distCoeffs_R = (Mat_<float>(1, 5) << -0.0848605945510993, 0.212305665934113, -0.000585145907633591, -0.000718899576042846, -0.0908279577541819);// å³ç›¸æœºçš„ç•¸å˜ç³»æ•°
+//æ—‹è½¬çŸ©é˜µ
 Mat R = (cv::Mat_<double>(3, 3) << 0.998950576820749, -0.0214417692637061, 0.0404361389225034,
 	0.0202157170894231, 0.999330628013878, 0.0304896817948001,
 	-0.0410628248258496, -0.0296402841455635, 0.998716825718428);
 
-//Æ½ÒÆ¾ØÕó
+//å¹³ç§»çŸ©é˜µ
 Mat T = (cv::Mat_<double>(3, 1) << -181.536578507112,
 	0.126450133817349,
 	4.80301053133881);
-// Í¼Ïñ³ß´ç
+// å›¾åƒå°ºå¯¸
 Size imageSize(1280, 1024);
 
-Mat R1, R2, P1, P2, Q; // Á¢ÌåĞ£Õı²ÎÊı
-Mat mapl1, mapl2, mapr1, mapr2; // Í¼ÏñÖØÍ¶Ó°Ó³Éä±í
-Mat img1_rectified, img2_rectified, result3DImage; // Ğ£ÕıÍ¼Ïñ  Éî¶ÈÍ¼
+Mat R1, R2, P1, P2, Q; // ç«‹ä½“æ ¡æ­£å‚æ•°
+Mat mapl1, mapl2, mapr1, mapr2; // å›¾åƒé‡æŠ•å½±æ˜ å°„è¡¨
+Mat img1_rectified, img2_rectified, result3DImage; // æ ¡æ­£å›¾åƒ  æ·±åº¦å›¾
 Rect validRoi[2];
 
 
 /*
-Á¢ÌåĞ£Õı
-²ÎÊı£º
-	stereoRectifyParams	´æ·ÅÁ¢ÌåĞ£Õı½á¹ûµÄtxt
-	cameraMatrix			Ïà»úÄÚ²ÎÊı
-	distCoeffs				Ïà»ú»û±äÏµÊı
-	imageSize				Í¼Ïñ³ß´ç
-	R						×óÓÒÏà»úÏà¶ÔµÄĞı×ª¾ØÕó
-	T						×óÓÒÏà»úÏà¶ÔµÄÆ½ÒÆÏòÁ¿
-	R1, R2					ĞĞ¶ÔÆëĞı×ªĞ£Õı
-	P1, P2					×óÓÒÍ¶Ó°¾ØÕó
-	Q						ÖØÍ¶Ó°¾ØÕó
-	map1, map2				ÖØÍ¶Ó°Ó³Éä±í
+ç«‹ä½“æ ¡æ­£
+å‚æ•°ï¼š
+	stereoRectifyParams	å­˜æ”¾ç«‹ä½“æ ¡æ­£ç»“æœçš„txt
+	cameraMatrix			ç›¸æœºå†…å‚æ•°
+	distCoeffs				ç›¸æœºç•¸å˜ç³»æ•°
+	imageSize				å›¾åƒå°ºå¯¸
+	R						å·¦å³ç›¸æœºç›¸å¯¹çš„æ—‹è½¬çŸ©é˜µ
+	T						å·¦å³ç›¸æœºç›¸å¯¹çš„å¹³ç§»å‘é‡
+	R1, R2					è¡Œå¯¹é½æ—‹è½¬æ ¡æ­£
+	P1, P2					å·¦å³æŠ•å½±çŸ©é˜µ
+	Q						é‡æŠ•å½±çŸ©é˜µ
+	map1, map2				é‡æŠ•å½±æ˜ å°„è¡¨
 */
 
 Rect stereoRectification(const char* stereoRectifyParams, Mat& cameraMatrix1, Mat& distCoeffs1, Mat& cameraMatrix2, Mat& distCoeffs2,
@@ -69,16 +69,16 @@ Rect stereoRectification(const char* stereoRectifyParams, Mat& cameraMatrix1, Ma
 	ofstream stereoStore(stereoRectifyParams);
 	stereoRectify(cameraMatrix1, distCoeffs1, cameraMatrix2, distCoeffs2, imageSize,
 		R, T, R1, R2, P1, P2, Q, CALIB_ZERO_DISPARITY, 0, imageSize, &validRoi[0], &validRoi[1]);
-	// ¼ÆËã×óÓÒÍ¼ÏñµÄÖØÍ¶Ó°Ó³Éä±í
-	stereoStore << "R1£º" << endl;
+	// è®¡ç®—å·¦å³å›¾åƒçš„é‡æŠ•å½±æ˜ å°„è¡¨
+	stereoStore << "R1ï¼š" << endl;
 	stereoStore << R1 << endl;
-	stereoStore << "R2£º" << endl;
+	stereoStore << "R2ï¼š" << endl;
 	stereoStore << R2 << endl;
-	stereoStore << "P1£º" << endl;
+	stereoStore << "P1ï¼š" << endl;
 	stereoStore << P1 << endl;
-	stereoStore << "P2£º" << endl;
+	stereoStore << "P2ï¼š" << endl;
 	stereoStore << P2 << endl;
-	stereoStore << "Q£º" << endl;
+	stereoStore << "Qï¼š" << endl;
 	stereoStore << Q << endl;
 	stereoStore.close();
 	cout << "R1:" << endl;
@@ -96,7 +96,7 @@ Rect stereoRectification(const char* stereoRectifyParams, Mat& cameraMatrix1, Ma
 	return validRoi[0], validRoi[1];
 }
 void draw_ellipse(Mat& image, vector<xfeatures2d::Elliptic_KeyPoint>& elliptic_keypoints, Mat& image_rgb)
-{   // ²ÊÉ«Í¼ÏñÉÏ½øĞĞÅĞ¶ÏÓë»æÖÆ
+{   // å½©è‰²å›¾åƒä¸Šè¿›è¡Œåˆ¤æ–­ä¸ç»˜åˆ¶
 	if (1 == image.channels()) {
 		image_rgb = Mat(Size(image.cols, image.rows), CV_8UC3);
 		cvtColor(image, image_rgb, COLOR_GRAY2BGR);
@@ -104,19 +104,19 @@ void draw_ellipse(Mat& image, vector<xfeatures2d::Elliptic_KeyPoint>& elliptic_k
 	else {
 		image.copyTo(image_rgb);
 	}
-	Point center; // ÖĞĞÄµã×ø±ê
-	Size axes;    // ÍÖÔ²³¤¶ÌÖá
-				  // ½øĞĞÌØÕ÷µãÍÖÔ²»æÖÆ
+	Point center; // ä¸­å¿ƒç‚¹åæ ‡
+	Size axes;    // æ¤­åœ†é•¿çŸ­è½´
+				  // è¿›è¡Œç‰¹å¾ç‚¹æ¤­åœ†ç»˜åˆ¶
 	for (int i = 0; i < elliptic_keypoints.size(); ++i)
 	{
 		center.x = elliptic_keypoints[i].pt.x;
 		center.y = elliptic_keypoints[i].pt.y;
 		axes.width = elliptic_keypoints[i].axes.width;
 		axes.height = elliptic_keypoints[i].axes.height;
-		double angle = elliptic_keypoints[i].angle;  // ½Ç¶È
-													 // »æÖÆÍÖÔ²Í¼Ïñ
+		double angle = elliptic_keypoints[i].angle;  // è§’åº¦
+													 // ç»˜åˆ¶æ¤­åœ†å›¾åƒ
 		ellipse(image_rgb, center, axes, angle * 180 / CV_PI, 0, 360, Scalar(255, 255, 255), 2, 8);
-		// »æÖÆÖĞĞÄµã×ø±ê
+		// ç»˜åˆ¶ä¸­å¿ƒç‚¹åæ ‡
 		circle(image_rgb, center, 1, Scalar(0, 0, 255));
 	}
 }
@@ -138,44 +138,44 @@ bool convertEllipseKptsToStandardKpts(const vector<xfeatures2d::Elliptic_KeyPoin
 	return true;
 }
 /*
-¼ÆËãÊÓ²îÍ¼
-²ÎÊı£º
-	imageName1	×óÏà»úÅÄÉãµÄÍ¼Ïñ
-	imageName2	ÓÒÏà»úÅÄÉãµÄÍ¼Ïñ
-	img1_rectified	ÖØÓ³ÉäºóµÄ×ó²àÏà»úÍ¼Ïñ
-	img2_rectified	ÖØÓ³ÉäºóµÄÓÒ²àÏà»úÍ¼Ïñ
-	map	ÖØÍ¶Ó°Ó³Éä±í
+è®¡ç®—è§†å·®å›¾
+å‚æ•°ï¼š
+	imageName1	å·¦ç›¸æœºæ‹æ‘„çš„å›¾åƒ
+	imageName2	å³ç›¸æœºæ‹æ‘„çš„å›¾åƒ
+	img1_rectified	é‡æ˜ å°„åçš„å·¦ä¾§ç›¸æœºå›¾åƒ
+	img2_rectified	é‡æ˜ å°„åçš„å³ä¾§ç›¸æœºå›¾åƒ
+	map	é‡æŠ•å½±æ˜ å°„è¡¨
 */
 bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& img1_rectified,
 	Mat& img2_rectified, Mat& mapl1, Mat& mapl2, Mat& mapr1, Mat& mapr2, Rect validRoi[2])
 {
-	// Ê×ÏÈ£¬¶Ô×óÓÒÏà»úµÄÁ½ÕÅÍ¼Æ¬½øĞĞÖØ¹¹
+	// é¦–å…ˆï¼Œå¯¹å·¦å³ç›¸æœºçš„ä¸¤å¼ å›¾ç‰‡è¿›è¡Œé‡æ„
 	Mat img1 = imread(imageName1);
 	Mat img2 = imread(imageName2);
 	if (img1.empty() | img2.empty())
 	{
-		cout << "Í¼ÏñÎª¿Õ" << endl;
+		cout << "å›¾åƒä¸ºç©º" << endl;
 	}
 	Mat gray_img1, gray_img2;
 	cvtColor(img1, gray_img1, COLOR_BGR2GRAY);
 	cvtColor(img2, gray_img2, COLOR_BGR2GRAY);
-	Mat canvas(imageSize.height, imageSize.width * 2, CV_8UC1); // ×¢ÒâÊı¾İÀàĞÍ
+	Mat canvas(imageSize.height, imageSize.width * 2, CV_8UC1); // æ³¨æ„æ•°æ®ç±»å‹
 	Mat canLeft = canvas(Rect(0, 0, imageSize.width, imageSize.height));
 	Mat canRight = canvas(Rect(imageSize.width, 0, imageSize.width, imageSize.height));
 	gray_img1.copyTo(canLeft);
 	gray_img2.copyTo(canRight);
-	imwrite("Ğ£ÕıÇ°×óÓÒÏà»úÍ¼Ïñ.jpg", canvas);
+	imwrite("æ ¡æ­£å‰å·¦å³ç›¸æœºå›¾åƒ.jpg", canvas);
 	remap(gray_img1, img1_rectified, mapl1, mapl2, INTER_LINEAR);
 	remap(gray_img2, img2_rectified, mapr1, mapr2, INTER_LINEAR);
-	imwrite("×óÏà»úĞ£ÕıÍ¼Ïñ.jpg", img1_rectified);
-	imwrite("ÓÒÏà»úĞ£ÕıÍ¼Ïñ.jpg", img2_rectified);
+	imwrite("å·¦ç›¸æœºæ ¡æ­£å›¾åƒ.jpg", img1_rectified);
+	imwrite("å³ç›¸æœºæ ¡æ­£å›¾åƒ.jpg", img2_rectified);
 	img1_rectified.copyTo(canLeft);
 	img2_rectified.copyTo(canRight);
 	rectangle(canLeft, validRoi[0], Scalar(255, 255, 255), 5, 8);
 	rectangle(canRight, validRoi[1], Scalar(255, 255, 255), 5, 8);
 	for (int j = 0; j <= canvas.rows; j += 16)
 		line(canvas, Point(0, j), Point(canvas.cols, j), Scalar(0, 255, 0), 1, 8);
-	imwrite("Ğ£Õıºó×óÓÒÏà»úÍ¼Ïñ.jpg", canvas);
+	imwrite("æ ¡æ­£åå·¦å³ç›¸æœºå›¾åƒ.jpg", canvas);
 
 	
 	 img1 = imread("./image/img1_rectified.jpg");
@@ -201,34 +201,34 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	else {
 		img2.copyTo(img2gray);
 	}
-	//-- ³õÊ¼»¯HarrisLaplaceÌØÕ÷µã¼ì²â
+	//-- åˆå§‹åŒ–HarrisLaplaceç‰¹å¾ç‚¹æ£€æµ‹
 	Ptr<FeatureDetector> feature2D = xfeatures2d::HarrisLaplaceFeatureDetector::create();
-	//-- ³õÊ¼»¯SIFT ÌØÕ÷ÃèÊö×Ó																				  
+	//-- åˆå§‹åŒ–SIFT ç‰¹å¾æè¿°å­																				  
 	Ptr<DescriptorExtractor> descriptor2D = cv::SIFT::create();
 
-	//-- Step 1: ÌáÈ¡ÌØÕ÷µã
+	//-- Step 1: æå–ç‰¹å¾ç‚¹
 	vector<xfeatures2d::Elliptic_KeyPoint> aff_kpts1, aff_kpts2;
-	//-- ³õÊ¼»¯·ÂÉä²»±äÊı¾İÀà   feature2D: ÌØÕ÷µãÌáÈ¡·½Ê½  descriptor2D: ÃèÊö·ûÌáÈ¡·½Ê½
+	//-- åˆå§‹åŒ–ä»¿å°„ä¸å˜æ•°æ®ç±»   feature2D: ç‰¹å¾ç‚¹æå–æ–¹å¼  descriptor2D: æè¿°ç¬¦æå–æ–¹å¼
 	Ptr<xfeatures2d::AffineFeature2D> affineFeature2D = xfeatures2d::AffineFeature2D::create(feature2D, descriptor2D);
-	//-- ¼ì²â·ÂÉäÌØÕ÷µã
+	//-- æ£€æµ‹ä»¿å°„ç‰¹å¾ç‚¹
 	affineFeature2D->detect(img1gray, aff_kpts1);
 	affineFeature2D->detect(img2gray, aff_kpts2);
-	//-- ¼ì²âµ½µÄÌØÕ÷µã¼¯ĞÅÏ¢Êı¾İ½á¹¹ Elliptic_KeyPoint ×ª»» KeyPoint
+	//-- æ£€æµ‹åˆ°çš„ç‰¹å¾ç‚¹é›†ä¿¡æ¯æ•°æ®ç»“æ„ Elliptic_KeyPoint è½¬æ¢ KeyPoint
 	vector<KeyPoint> kpts1, kpts2;
 	convertEllipseKptsToStandardKpts(aff_kpts1, kpts1);
 	convertEllipseKptsToStandardKpts(aff_kpts2, kpts2);
 
-	//-- Step 2: ¼ÆËãÌØÕ÷µãÓëÃèÊö·û
+	//-- Step 2: è®¡ç®—ç‰¹å¾ç‚¹ä¸æè¿°ç¬¦
 	Mat desc1, desc2;
-	//-- »Ò¶ÈÍ¼ÏñÊäÈë¼ÆËãÌØÕ÷ÃèÊö·û   Èë²Î×îºótrue/false true±íÊ¾Íâ²¿Ìá¹©ÌØÕ÷µã(falseÔò±íÊ¾Ïà·´)
+	//-- ç°åº¦å›¾åƒè¾“å…¥è®¡ç®—ç‰¹å¾æè¿°ç¬¦   å…¥å‚æœ€åtrue/false trueè¡¨ç¤ºå¤–éƒ¨æä¾›ç‰¹å¾ç‚¹(falseåˆ™è¡¨ç¤ºç›¸å)
 	affineFeature2D->detectAndCompute(img1gray, Mat(), aff_kpts1, desc1, true);
 	affineFeature2D->detectAndCompute(img2gray, Mat(), aff_kpts2, desc2, true);
 
-	//-- Step 3: Æ¥ÅäÌØÕ÷ÃèÊö·û
+	//-- Step 3: åŒ¹é…ç‰¹å¾æè¿°ç¬¦
 	FlannBasedMatcher matcher;
 	vector<DMatch> matches;
 	matcher.match(desc1, desc2, matches);
-	//-- Step 4: Í¨¹ıVFCÒÆ³ı´íÎóÆ¥Åäµã¶Ô
+	//-- Step 4: é€šè¿‡VFCç§»é™¤é”™è¯¯åŒ¹é…ç‚¹å¯¹
 	vector<Point2f> X;  vector<Point2f> Y;
 	X.clear();   Y.clear();
 
@@ -253,12 +253,12 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 		int idx = matchIdx[i];
 		correctMatches.push_back(matches[idx]);
 	}
-	//-- »æÖÆÆ¥Åä½á¹ûÍ¼
+	//-- ç»˜åˆ¶åŒ¹é…ç»“æœå›¾
 	Mat img_Matches;
 	drawMatches(img1, kpts1, img2, kpts2, correctMatches, img_Matches, Scalar::all(-1), \
 		Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
 	
-	/********ÏàËÆÈı½ÇĞÎ²â¾à·¨ ¼ÆËã¾àÀë*******/
+	/********ç›¸ä¼¼ä¸‰è§’å½¢æµ‹è·æ³• è®¡ç®—è·ç¦»*******/
 	double B = sqrt(T.at<double>(0, 0) * T.at<double>(0, 0) + T.at<double>(1, 0) * T.at<double>(1, 0) + T.at<double>(2, 0) * T.at<double>(2, 0));
 	double f = Q.at<double>(2, 3);
 	double avr_dis = 0;
@@ -266,7 +266,7 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 	Point origin;
 	cout << "f = " << f << endl;
 	cout << "B = " << B << endl;
-	cout << "Æ¥Åä³É¹¦ÇÒÉ¸Ñ¡ºóÌØÕ÷µã¶ÔÊı£º " << correctMatches.size() << endl;
+	cout << "åŒ¹é…æˆåŠŸä¸”ç­›é€‰åç‰¹å¾ç‚¹å¯¹æ•°ï¼š " << correctMatches.size() << endl;
 	cout << "********************************************" << endl;
 	for (int i = 0; i < correctMatches.size(); i++)
 	{
@@ -279,15 +279,15 @@ bool computeDisparityImage(const char* imageName1, const char* imageName2, Mat& 
 		double distance = f * B / abs(x_L - x_R);
 		//cout << "x_L = " << x_L << endl;
 		//cout << "x_R = " << x_R << endl;
-		cout << to_string(correctMatches[i].queryIdx) << " µãµÄx×ø±êÎª: " << x_L << " ÇóµÃµÄ¾àÀëÎª£º " << distance << " mm" << endl;
+		cout << to_string(correctMatches[i].queryIdx) << " ç‚¹çš„xåæ ‡ä¸º: " << x_L << " æ±‚å¾—çš„è·ç¦»ä¸ºï¼š " << distance << " mm" << endl;
 	}
-	imshow("Harris_FlannÆ¥Åä", img_Matches);
-	imwrite("./image/harrisAffineÆ¥Åä.png", img_Matches);
+	imshow("Harris_FlannåŒ¹é…", img_Matches);
+	imwrite("./image/harrisAffineåŒ¹é….png", img_Matches);
 	
 	return true;
 }
 
-// Êó±ê»Øµ÷º¯Êı£¬µã»÷ÊÓ²îÍ¼ÏÔÊ¾Éî¶È
+// é¼ æ ‡å›è°ƒå‡½æ•°ï¼Œç‚¹å‡»è§†å·®å›¾æ˜¾ç¤ºæ·±åº¦
 void onMouse(int event, int x, int y, int flags, void* param)
 {
 	Point point;
@@ -301,14 +301,14 @@ void onMouse(int event, int x, int y, int flags, void* param)
 
 int main()
 {
-	//½øĞĞÁ¢ÌåĞ£Õı
+	//è¿›è¡Œç«‹ä½“æ ¡æ­£
 	validRoi[0], validRoi[1] = stereoRectification(stereoRectifyParams, cameraMatrix_L, distCoeffs_L, cameraMatrix_R, distCoeffs_R,
 		imageSize, R, T, R1, R2, P1, P2, Q, mapl1, mapl2, mapr1, mapr2);
-	cout << "ÒÑ´´½¨Í¼ÏñÖØÍ¶Ó°Ó³Éä±í£¡" << endl;
-	//SIFTÌØÕ÷µãÌáÈ¡ÓëÆ¥Åä
+	cout << "å·²åˆ›å»ºå›¾åƒé‡æŠ•å½±æ˜ å°„è¡¨ï¼" << endl;
+	//SIFTç‰¹å¾ç‚¹æå–ä¸åŒ¹é…
 	computeDisparityImage(imageName_L, imageName_R, img1_rectified, img2_rectified, mapl1, mapl2, mapr1, mapr2, validRoi);
 
-	waitKey(0);  //µÈ´ı¼üÅÌÊäÈë
+	waitKey(0);  //ç­‰å¾…é”®ç›˜è¾“å…¥
 	return 0;
 }
 
