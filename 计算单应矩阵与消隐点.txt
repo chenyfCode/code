@@ -1,0 +1,363 @@
+#include <opencv2/opencv.hpp>
+#include <opencv2/xfeatures2d.hpp>
+#include<iostream>
+#include<math.h>
+#include <string> 
+#include<fstream> 
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/calib3d/calib3d.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include <opencv2\imgproc\types_c.h>
+
+using namespace cv;
+using namespace std;
+using namespace cv::xfeatures2d;
+
+ofstream DataSave("D:/HIT2022B/Code/CodeEdit/Images/1Dclibrate/TestData.txt");
+
+
+
+int main() {
+	vector<Point2f>FadePoint_L, FadePoint_R;
+
+	//2602mm高丽盼公式  剔除了五对看起来不合理的点对
+	/*FadePoint_L.push_back(Point2f(1.3639557e+04, 1.5440898e+03));
+	FadePoint_L.push_back(Point2f(1.5314138e+04,   1.1704801e+03));
+	FadePoint_L.push_back(Point2f(1.4192100e+04, - 3.9303760e+01));
+	FadePoint_L.push_back(Point2f(1.0275144e+04,   7.0250927e+01));
+	FadePoint_L.push_back(Point2f(-7.4572787e+03,   1.6442153e+02));
+	FadePoint_L.push_back(Point2f(-4.4412971e+03,   1.5233231e+02));
+	FadePoint_L.push_back(Point2f(-2.1559487e+03,   6.5971359e+02));
+	FadePoint_L.push_back(Point2f(-1.1711668e+04,   1.0771428e+03));
+	FadePoint_L.push_back(Point2f(-5.1486735e+03,   9.1981172e+01));
+	FadePoint_L.push_back(Point2f(1.3488918e+04,   7.8016942e+02));
+	FadePoint_L.push_back(Point2f(2.1775760e+04,   1.0267108e+03));
+	FadePoint_L.push_back(Point2f(1.0378526e+04,   9.3814290e+02));
+	FadePoint_L.push_back(Point2f(1.4892086e+04,   1.0021047e+03));
+	FadePoint_L.push_back(Point2f(2.1487171e+04,   9.9413938e+02));
+	FadePoint_L.push_back(Point2f(-8.7664276e+04,   1.2462966e+03));
+
+
+	FadePoint_R.push_back(Point2f(2.3219649e+04,   1.9534931e+03));
+	FadePoint_R.push_back(Point2f(2.5704942e+04,   3.9428999e+03));
+	FadePoint_R.push_back(Point2f(2.0064874e+04, - 8.5506515e+01));
+	FadePoint_R.push_back(Point2f(1.3233149e+04,   1.3643857e+02));
+	FadePoint_R.push_back(Point2f(-6.0214567e+03,   2.8472486e+02));
+	FadePoint_R.push_back(Point2f(-3.6767855e+03,   1.3581971e+02));
+	FadePoint_R.push_back(Point2f(-1.9234507e+03,   6.3118269e+02));
+	FadePoint_R.push_back(Point2f(-8.9872608e+03,   8.2988953e+02));
+	FadePoint_R.push_back(Point2f(-4.4062513e+03,   2.4976699e+02));
+	FadePoint_R.push_back(Point2f(2.1303639e+04,   1.1659406e+03));
+	FadePoint_R.push_back(Point2f(4.7361420e+04,   6.5105274e+02));
+	FadePoint_R.push_back(Point2f(1.4015156e+04,   1.0990312e+03));
+	FadePoint_R.push_back(Point2f(2.2173091e+04,   1.3532258e+03));
+	FadePoint_R.push_back(Point2f(5.3160046e+04,   1.3208271e+03));
+	FadePoint_R.push_back(Point2f(-2.3258203e+04,   2.7649311e+03));*/
+
+
+	//2602mm王年公式
+	/*FadePoint_L.push_back(Point2f(3.4799602e+02,   5.1773572e+02));
+	FadePoint_L.push_back(Point2f(4.8612969e+02,   5.0783000e+02));
+	FadePoint_L.push_back(Point2f(5.2584016e+02,   4.3061698e+02));
+	FadePoint_L.push_back(Point2f(5.4457772e+02,   3.3710412e+02));
+	FadePoint_L.push_back(Point2f(6.2179702e+02,   3.1282168e+02));
+	FadePoint_L.push_back(Point2f(6.5546198e+02,   2.6898083e+02));
+	FadePoint_L.push_back(Point2f(5.0241935e+02,   2.7051728e+02));
+	FadePoint_L.push_back(Point2f(3.4980090e+02, 2.6275778e+02));
+	FadePoint_L.push_back(Point2f(1.6490362e+02, 2.7232946e+02));
+	FadePoint_L.push_back(Point2f(1.4120732e+02, 5.1597636e+02));
+	FadePoint_L.push_back(Point2f(4.4104693e+01, 6.0601752e+02));
+	FadePoint_L.push_back(Point2f(1.1304114e+02, 6.7576979e+02));
+	FadePoint_L.push_back(Point2f(2.4846812e+02, 6.6186613e+02));
+	FadePoint_L.push_back(Point2f(4.9752746e+02,   6.2068287e+02));
+	FadePoint_L.push_back(Point2f(6.6530213e+02,   5.6987816e+02));
+	FadePoint_L.push_back(Point2f(5.9995566e+02,   6.8456220e+02));
+	FadePoint_L.push_back(Point2f(6.1598574e+02,   8.3012914e+02));
+	FadePoint_L.push_back(Point2f(7.2982076e+02,   8.4711161e+02));
+	FadePoint_L.push_back(Point2f(5.4367986e+02,   8.5586305e+02));
+	FadePoint_L.push_back(Point2f(3.5327690e+02,   8.4416781e+02));*/
+
+	/*FadePoint_R.push_back(Point2f(2.8794926e+02,   5.4051844e+02));
+	FadePoint_R.push_back(Point2f(4.2160648e+02,   5.3367524e+02));
+	FadePoint_R.push_back(Point2f(4.6046201e+02,   4.5817615e+02));
+	FadePoint_R.push_back(Point2f(4.7911148e+02,   3.6582216e+02));
+	FadePoint_R.push_back(Point2f(5.5614158e+02,   3.4310180e+02));
+	FadePoint_R.push_back(Point2f(5.8908134e+02,   2.9966319e+02));
+	FadePoint_R.push_back(Point2f(4.3898031e+02,   2.9912724e+02));
+	FadePoint_R.push_back(Point2f(2.9464177e+02, 2.8967547e+02));
+	FadePoint_R.push_back(Point2f(1.2101203e+02, 2.9542978e+02));
+	FadePoint_R.push_back(Point2f(9.5300108e+01, 5.3406868e+02));
+	FadePoint_R.push_back(Point2f(-9.7703552e+00, 6.2071467e+02));
+	FadePoint_R.push_back(Point2f(5.8398371e+01, 6.9142334e+02));
+	FadePoint_R.push_back(Point2f(1.8361975e+02, 6.8113168e+02));
+	FadePoint_R.push_back(Point2f(4.2699408e+02,   6.4648563e+02));
+	FadePoint_R.push_back(Point2f(5.9864627e+02,   5.9971671e+02));
+	FadePoint_R.push_back(Point2f(5.2838749e+02,   7.1246484e+02));
+	FadePoint_R.push_back(Point2f(5.3833482e+02,   8.5935674e+02));
+	FadePoint_R.push_back(Point2f(6.5283452e+02,   8.8006567e+02));
+	FadePoint_R.push_back(Point2f(4.6567400e+02,   8.8265959e+02));
+	FadePoint_R.push_back(Point2f(2.7902359e+02,   8.6521148e+02));*/
+
+
+	////****************12038mm数据 王年公式*************************
+	/*FadePoint_L.push_back(Point2f(3.9404831e+02,   4.4395117e+02));
+	FadePoint_L.push_back(Point2f(3.9984247e+02,   2.6336373e+02));
+	FadePoint_L.push_back(Point2f(2.3685014e+02,   2.6026261e+02));
+	FadePoint_L.push_back(Point2f(2.0010974e+02,   4.8279557e+02));
+	FadePoint_L.push_back(Point2f(2.0602020e+02,   6.8897117e+02));
+	FadePoint_L.push_back(Point2f(1.6769548e+02,   7.6490883e+02));
+	FadePoint_L.push_back(Point2f(2.4189021e+02,   7.5087857e+02));
+	FadePoint_L.push_back(Point2f(3.4999515e+02,   7.1472721e+02));
+	FadePoint_L.push_back(Point2f(4.9424478e+02,   7.0651782e+02));
+	FadePoint_L.push_back(Point2f(6.9344947e+02,   6.9192895e+02));
+	FadePoint_L.push_back(Point2f(6.4614167e+02,   5.6462410e+02));
+	FadePoint_L.push_back(Point2f(6.2133741e+02,   3.9564110e+02));
+	FadePoint_L.push_back(Point2f(6.1518464e+02,   2.5848698e+02));
+	FadePoint_L.push_back(Point2f(4.9358051e+02,   2.5466137e+02));
+	FadePoint_L.push_back(Point2f(3.5254887e+02,   2.6952651e+02));
+	FadePoint_L.push_back(Point2f(2.2516861e+02,   2.8399745e+02));
+	FadePoint_L.push_back(Point2f(1.8434014e+02,   4.2243643e+02));
+	FadePoint_L.push_back(Point2f(3.5420511e+02,   4.5638674e+02));
+	FadePoint_L.push_back(Point2f(5.8549814e+02,   4.9693422e+02));
+	FadePoint_L.push_back(Point2f(6.3727322e+02,   6.2791357e+02));
+
+	FadePoint_R.push_back(Point2f(3.5190130e+02,   4.6956503e+02));
+	FadePoint_R.push_back(Point2f(3.5898718e+02,   2.9123881e+02));
+	FadePoint_R.push_back(Point2f(2.0221142e+02,   2.8571462e+02));
+	FadePoint_R.push_back(Point2f(1.6302186e+02,   5.0328424e+02));
+	FadePoint_R.push_back(Point2f(1.6529765e+02,   7.0814139e+02));
+	FadePoint_R.push_back(Point2f(1.2752673e+02,   7.8164510e+02));
+	FadePoint_R.push_back(Point2f(1.9750236e+02,   7.7039682e+02));
+	FadePoint_R.push_back(Point2f(3.0247843e+02,   7.3648293e+02));
+	FadePoint_R.push_back(Point2f(4.4192375e+02,   7.3270086e+02));
+	FadePoint_R.push_back(Point2f(6.3672374e+02,   7.2384191e+02));
+	FadePoint_R.push_back(Point2f(5.9277294e+02,   5.9489388e+02));
+	FadePoint_R.push_back(Point2f(5.6882904e+02,   4.2602232e+02));
+	FadePoint_R.push_back(Point2f(5.6575520e+02,   2.8901769e+02));
+	FadePoint_R.push_back(Point2f(4.4973152e+02,   2.8359549e+02));
+	FadePoint_R.push_back(Point2f(3.1440611e+02,   2.9659433e+02));
+	FadePoint_R.push_back(Point2f(1.9214074e+02,   3.0843435e+02));
+	FadePoint_R.push_back(Point2f(1.4846130e+02,   4.4444207e+02));
+	FadePoint_R.push_back(Point2f(3.1055799e+02,   4.8078974e+02));
+	FadePoint_R.push_back(Point2f(5.3367366e+02,   5.2519881e+02));
+	FadePoint_R.push_back(Point2f(5.8497850e+02,   6.5774048e+02));*/
+
+	//***************************8mm文件数据 使用王年公式***********************
+	/*FadePoint_L.push_back(Point2f(4.3811314e+02,   4.4626221e+02));
+	FadePoint_L.push_back(Point2f(2.4381576e+02,   4.5016026e+02));
+	FadePoint_L.push_back(Point2f(1.3147192e+02,   4.5555913e+02));
+	FadePoint_L.push_back(Point2f(1.0217119e+02,   2.0702498e+02));
+	FadePoint_L.push_back(Point2f(4.1941207e+02,   1.8715514e+02));
+	FadePoint_L.push_back(Point2f(8.0227017e+02,   3.0048110e+02));
+	FadePoint_L.push_back(Point2f(7.0194438e+02,   4.5873549e+02));
+	FadePoint_L.push_back(Point2f(7.0434591e+02,   6.5588863e+02));
+	FadePoint_L.push_back(Point2f(7.3884366e+02,   8.4771508e+02));
+	FadePoint_L.push_back(Point2f(4.8523134e+02,   8.0317047e+02));
+	FadePoint_L.push_back(Point2f(2.6457133e+02,   8.0796279e+02));
+	FadePoint_L.push_back(Point2f(1.8358975e+02,   7.9896053e+02));
+	FadePoint_L.push_back(Point2f(2.4220791e+02,   5.6588484e+02));
+	FadePoint_L.push_back(Point2f(5.5373009e+02,   5.2813677e+02));
+	FadePoint_L.push_back(Point2f(7.0380618e+02,   5.3338852e+02));
+	FadePoint_L.push_back(Point2f(7.5444408e+02,   2.0803133e+02));
+	FadePoint_L.push_back(Point2f(6.3336829e+02,   2.4915065e+02));
+	FadePoint_L.push_back(Point2f(4.0156227e+02,   2.6703928e+02));
+	FadePoint_L.push_back(Point2f(1.1445033e+02,   2.7422103e+02));
+	FadePoint_L.push_back(Point2f(1.1715202e+02,   5.2063426e+02));
+
+	FadePoint_R.push_back(Point2f(3.1345566e+02,   4.7966475e+02));
+	FadePoint_R.push_back(Point2f(1.2616076e+02,   4.8104109e+02));
+	FadePoint_R.push_back(Point2f(1.7565075e+01,   4.8490101e+02));
+	FadePoint_R.push_back(Point2f(-3.4174828e+00,   2.3918016e+02));
+	FadePoint_R.push_back(Point2f(2.9629914e+02,   2.2381737e+02));
+	FadePoint_R.push_back(Point2f(6.6778316e+02,   3.3908328e+02));
+	FadePoint_R.push_back(Point2f(5.6977246e+02,   4.9521559e+02));
+	FadePoint_R.push_back(Point2f(5.6970806e+02,   6.9107512e+02));
+	FadePoint_R.push_back(Point2f(6.0236613e+02,   8.8347551e+02));
+	FadePoint_R.push_back(Point2f(3.5137823e+02,   8.3533905e+02));
+	FadePoint_R.push_back(Point2f(1.3691234e+02,   8.3726652e+02));
+	FadePoint_R.push_back(Point2f(6.2902099e+01,   8.2735213e+02));
+	FadePoint_R.push_back(Point2f(1.2233874e+02,   5.9557318e+02));
+	FadePoint_R.push_back(Point2f(4.2163895e+02,   5.6176889e+02));
+	FadePoint_R.push_back(Point2f(5.6818471e+02,   5.6876037e+02));
+	FadePoint_R.push_back(Point2f(6.2158436e+02,   2.4675138e+02));
+	FadePoint_R.push_back(Point2f(5.0226065e+02,   2.8663510e+02));
+	FadePoint_R.push_back(Point2f(2.7717381e+02,   3.0183962e+02));
+	FadePoint_R.push_back(Point2f(2.4682004e+00,   3.0540791e+02));
+	FadePoint_R.push_back(Point2f(3.3269495e+00,   5.4894501e+02));*/
+/*
+	//王年公式 1206-8mm-2602mm 取对角线共线角点
+	FadePoint_L.push_back(Point2f(3.7492354e+02,   3.1065863e+02));//1
+	FadePoint_L.push_back(Point2f(5.1247534e+02,   2.9769571e+02));//2
+	FadePoint_L.push_back(Point2f(5.3424578e+02,   2.1783361e+02));//3
+	FadePoint_L.push_back(Point2f(5.4602872e+02,   1.2242994e+02));//4
+	FadePoint_L.push_back(Point2f(6.2127587e+02,   1.0249354e+02));//5
+	FadePoint_L.push_back(Point2f(6.3690191e+02,   6.1464894e+01));//6
+	FadePoint_L.push_back(Point2f(4.9254593e+02,   6.1525672e+01));//7
+	FadePoint_L.push_back(Point2f(3.5523609e+02,   5.5406901e+01));//8
+	FadePoint_L.push_back(Point2f(1.8071143e+02,   7.3349158e+01));//9
+	FadePoint_L.push_back(Point2f(1.4765759e+02,   3.2489903e+02));//10
+	FadePoint_L.push_back(Point2f(3.7917169e+01,   4.0115962e+02));//11
+	FadePoint_L.push_back(Point2f(1.2067456e+02,   4.7491592e+02));//12
+	FadePoint_L.push_back(Point2f(2.5347886e+02,   4.4896466e+02));//13
+	FadePoint_L.push_back(Point2f(5.0548698e+02,   4.0671145e+02));//14
+	FadePoint_L.push_back(Point2f(6.5671781e+02,   3.6177896e+02));//15
+	FadePoint_L.push_back(Point2f(6.1182015e+02,   4.7001200e+02));//16
+	FadePoint_L.push_back(Point2f(6.2596631e+02,   6.1181155e+02));//17
+	FadePoint_L.push_back(Point2f(7.2943042e+02,   6.3018775e+02));//18
+	FadePoint_L.push_back(Point2f(5.5259099e+02,   6.3615289e+02));//19
+	FadePoint_L.push_back(Point2f(3.6431415e+02,   6.2720344e+02));//20
+
+	FadePoint_R.push_back(Point2f(3.1983159e+02,   3.3648677e+02));//1
+	FadePoint_R.push_back(Point2f(4.5320642e+02,   3.2596714e+02));//2
+	FadePoint_R.push_back(Point2f(4.7503688e+02,   2.4799891e+02));//3
+	FadePoint_R.push_back(Point2f(4.8711841e+02,   1.5371819e+02));//4
+	FadePoint_R.push_back(Point2f(5.6211298e+02,   1.3406341e+02));//5
+	FadePoint_R.push_back(Point2f(5.7824164e+02,   9.4321749e+01));//6
+	FadePoint_R.push_back(Point2f(4.3638125e+02,   9.3004655e+01));//7
+	FadePoint_R.push_back(Point2f(3.0624232e+02,   8.5317884e+01));//8
+	FadePoint_R.push_back(Point2f(1.4178654e+02,   1.0075010e+02));//9
+	FadePoint_R.push_back(Point2f(1.0834302e+02,   3.4604692e+02));//10
+	FadePoint_R.push_back(Point2f(-9.0164706e+00,   4.1914261e+02));//11
+	FadePoint_R.push_back(Point2f(7.2541455e+01,   4.9329366e+02));//12
+	FadePoint_R.push_back(Point2f(1.9456233e+02,   4.7036960e+02));//13
+	FadePoint_R.push_back(Point2f(4.4227509e+02,   4.3355668e+02));//14
+	FadePoint_R.push_back(Point2f(5.9597786e+02,   3.9146854e+02));//15
+	FadePoint_R.push_back(Point2f(5.4557858e+02,   4.9890044e+02));//16
+	FadePoint_R.push_back(Point2f(5.5485923e+02,   6.4107366e+02));//17
+	FadePoint_R.push_back(Point2f(6.5755002e+02,   6.6102068e+02));//18
+	FadePoint_R.push_back(Point2f(4.8055820e+02,   6.6310766e+02));//19
+	FadePoint_R.push_back(Point2f(2.9623833e+02,   6.4950798e+02));//20
+	*/
+	
+/*
+	//高丽盼公式 1206-8mm-2602mm 取对角线共线角点
+	FadePoint_L.push_back(Point2f(5.7933905e+05,   6.3781709e+04));//1
+	FadePoint_L.push_back(Point2f(1.4935817e+04,   9.5059283e+03));//2
+	FadePoint_L.push_back(Point2f(2.1733805e+04,   1.1388551e+04));//3
+	FadePoint_L.push_back(Point2f(1.9224552e+04,   9.7016110e+03));//4
+	FadePoint_L.push_back(Point2f(1.8587746e+04,   1.1317391e+04));//5
+	FadePoint_L.push_back(Point2f(2.1661860e+04,   9.0954478e+03));//6
+	FadePoint_L.push_back(Point2f(-1.6468071e+05, - 4.5997526e+04));//7
+	FadePoint_L.push_back(Point2f(-6.3985454e+03, - 2.9655479e+03));//8
+	FadePoint_L.push_back(Point2f(-4.0045286e+03, - 2.4164900e+03));//9
+	FadePoint_L.push_back(Point2f(-1.9195912e+03, - 8.5939949e+02));//10
+	FadePoint_L.push_back(Point2f(-9.0591454e+03, - 4.9568263e+03));//11
+	FadePoint_L.push_back(Point2f(-4.5990731e+03, - 2.6529622e+03));//12
+	FadePoint_L.push_back(Point2f(-1.9499321e+04, - 1.3837099e+04));//13
+	FadePoint_L.push_back(Point2f(2.7301173e+04,   1.1155436e+04));//14
+	FadePoint_L.push_back(Point2f(6.2796475e+04,   2.2300088e+04));//15
+	FadePoint_L.push_back(Point2f(1.2333429e+04,   6.2597413e+03));//16
+	FadePoint_L.push_back(Point2f(2.8795326e+04,   1.0563199e+04));//17
+	FadePoint_L.push_back(Point2f(9.7752705e+03,   5.0893883e+03));//18
+	FadePoint_L.push_back(Point2f(3.9213913e+04,   1.1941738e+04));//19
+	FadePoint_L.push_back(Point2f(-4.4490824e+04, - 8.6513376e+07));//20
+
+	FadePoint_R.push_back(Point2f(-2.7343996e+04, - 2.8411663e+04));//1
+	FadePoint_R.push_back(Point2f(3.4786062e+04,   1.7101928e+04));//2
+	FadePoint_R.push_back(Point2f(8.8208386e+04,   6.0985879e+04));//3
+	FadePoint_R.push_back(Point2f(5.2952021e+04,   3.2625835e+04));//4
+	FadePoint_R.push_back(Point2f(3.9361408e+04,   1.8307189e+04));//5
+	FadePoint_R.push_back(Point2f(5.9212128e+04,   2.4360329e+04));//6
+	FadePoint_R.push_back(Point2f(-2.5083951e+04, - 1.0289990e+04));//7
+	FadePoint_R.push_back(Point2f(-4.8815881e+03, - 2.5108280e+03));//8
+	FadePoint_R.push_back(Point2f(-3.1972700e+03, - 2.1253194e+03));//9
+	FadePoint_R.push_back(Point2f(-1.6319883e+03, - 8.2090127e+02));//10
+	FadePoint_R.push_back(Point2f(-7.1538839e+03, - 3.7636324e+03));//11
+	FadePoint_R.push_back(Point2f(-3.6838622e+03, - 2.2964534e+03));//12
+	FadePoint_R.push_back(Point2f(-1.1202703e+04, - 8.2988049e+03));//13
+	FadePoint_R.push_back(Point2f(9.5195280e+05,   2.2390040e+04));//14
+	FadePoint_R.push_back(Point2f(-7.7016827e+04,   1.8411020e+05));//15
+	FadePoint_R.push_back(Point2f(1.8618915e+04,   9.1624573e+03));//16
+	FadePoint_R.push_back(Point2f(1.1542000e+05,   3.5052029e+04));//17
+	FadePoint_R.push_back(Point2f(1.3464982e+04,   6.2999672e+03));//18
+	FadePoint_R.push_back(Point2f(-1.6577087e+05,   3.7874690e+04));//19
+	FadePoint_R.push_back(Point2f(-1.6447036e+04, - 1.6995070e+04));//20
+*/
+
+	/*
+	//使用棋盘格上的角点来计算单应矩阵
+	FadePoint_L.push_back(Point2f(7.620938110351562e+02, 5.696012573242188e+02));//1
+	FadePoint_L.push_back(Point2f(6.920637207031250e+02, 3.698220520019531e+02));//2
+	FadePoint_L.push_back(Point2f(8.335223999023438e+02, 3.748335876464844e+02));//3
+	FadePoint_L.push_back(Point2f(9.442690429687500e+02, 3.223945007324219e+02));//4
+	FadePoint_L.push_back(Point2f(3.953105773925781e+02, 4.306940612792969e+02));//5
+	FadePoint_L.push_back(Point2f(9.859050903320312e+02, 5.117645874023438e+02));//6
+
+	FadePoint_R.push_back(Point2f(6.974191894531250e+02, 6.016884765625000e+02));//1
+	FadePoint_R.push_back(Point2f(6.307815551757812e+02, 4.005900268554688e+02));//2
+	FadePoint_R.push_back(Point2f(7.709739379882812e+02, 4.080427856445313e+02));//3
+	FadePoint_R.push_back(Point2f(8.828150024414062e+02, 3.575275573730469e+02));//4
+	FadePoint_R.push_back(Point2f(3.327382812500000e+02, 4.552661132812500e+02));//5
+	FadePoint_R.push_back(Point2f(9.239354858398438e+02, 5.483598022460938e+02));//6
+	*/
+
+	FadePoint_L.push_back(Point2f(7.620938110351562e+02, 5.696012573242188e+02));//1
+	FadePoint_L.push_back(Point2f(767.812255859375,	523.803710937500));//2
+	FadePoint_L.push_back(Point2f(779.094360351563,	432.204437255859));//3
+	FadePoint_L.push_back(Point2f(781.929504394531,	409.289978027344));//4
+	//FadePoint_L.push_back(Point2f(898.148010253906,	559.497192382813));//5
+	//FadePoint_L.push_back(Point2f(903.526550292969,	514.040832519531));//6
+	//FadePoint_L.push_back(Point2f(914.044494628906,	423.172760009766));//7
+	//FadePoint_L.push_back(Point2f(878.531494140625,	534.027038574219));//8
+
+	FadePoint_R.push_back(Point2f(697.419189453125,	601.688476562500));//1
+	FadePoint_R.push_back(Point2f(704.154296875000,	555.934265136719));//2
+	FadePoint_R.push_back(Point2f(717.618347167969,	464.653228759766));//3
+	FadePoint_R.push_back(Point2f(720.935485839844,	441.801116943359));//4
+	//FadePoint_R.push_back(Point2f(835.410522460938,	594.468750000000));//5
+	//FadePoint_R.push_back(Point2f(841.783935546875,	548.886474609375));//6
+	//FadePoint_R.push_back(Point2f(854.283813476563,	457.876678466797));//7
+	//FadePoint_R.push_back(Point2f(815.927795410156,	568.391418457031));//8
+
+	Mat H = findHomography(FadePoint_L, FadePoint_R);
+	cout << H << endl;
+	DataSave << "单应矩阵H" << endl << H << endl;
+
+
+	return 0;
+}
+
+/*
+	FadePoint_L.push_back(Point2f());//1
+	FadePoint_L.push_back(Point2f());//2
+	FadePoint_L.push_back(Point2f());//3
+	FadePoint_L.push_back(Point2f());//4
+	FadePoint_L.push_back(Point2f());//5
+	FadePoint_L.push_back(Point2f());//6
+	FadePoint_L.push_back(Point2f());//7
+	FadePoint_L.push_back(Point2f());//8
+	FadePoint_L.push_back(Point2f());//9
+	FadePoint_L.push_back(Point2f());//10
+	FadePoint_L.push_back(Point2f());//11
+	FadePoint_L.push_back(Point2f());//12
+	FadePoint_L.push_back(Point2f());//13
+	FadePoint_L.push_back(Point2f());//14
+	FadePoint_L.push_back(Point2f());//15
+	FadePoint_L.push_back(Point2f());//16
+	FadePoint_L.push_back(Point2f());//17
+	FadePoint_L.push_back(Point2f());//18
+	FadePoint_L.push_back(Point2f());//19
+	FadePoint_L.push_back(Point2f());//20
+
+	FadePoint_R.push_back(Point2f());//1
+	FadePoint_R.push_back(Point2f());//2
+	FadePoint_R.push_back(Point2f());//3
+	FadePoint_R.push_back(Point2f());//4
+	FadePoint_R.push_back(Point2f());//5
+	FadePoint_R.push_back(Point2f());//6
+	FadePoint_R.push_back(Point2f());//7
+	FadePoint_R.push_back(Point2f());//8
+	FadePoint_R.push_back(Point2f());//9
+	FadePoint_R.push_back(Point2f());//10
+	FadePoint_R.push_back(Point2f());//11
+	FadePoint_R.push_back(Point2f());//12
+	FadePoint_R.push_back(Point2f());//13
+	FadePoint_R.push_back(Point2f());//14
+	FadePoint_R.push_back(Point2f());//15
+	FadePoint_R.push_back(Point2f());//16
+	FadePoint_R.push_back(Point2f());//17
+	FadePoint_R.push_back(Point2f());//18
+	FadePoint_R.push_back(Point2f());//19
+	FadePoint_R.push_back(Point2f());//20
+	*/
