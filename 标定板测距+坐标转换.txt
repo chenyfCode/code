@@ -9,52 +9,63 @@
 
 using namespace cv;
 using namespace std;
-
-//***************************参数以及初始化******************************//
 //Matlab和OpenCV进行相机标定得到的参数矩阵全是互为转置的!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//***************************参数以及初始化******************************//
+//----------------------------- 左相机单目相机参数---------------
+double rollangle = 0;//轴旋转的度数，单位：°
+double rollLengh = 21;//旋转轴长度 单位：mm
+Mat leftCMatrix = (cv::Mat_<float>(3, 3) <<
+	10214, 0, 1182.3,
+	0, 10215, 1088.7,
+	0, 0, 1); // 左相机的内参数
+Mat leftCdistCoeffs = (Mat_<float>(1, 4) << 0.17233, 0.3183, 0.0029758, -0.00045891); // 左相机的畸变系数
+Size smallboard(8, 11);
+const char* imageL = "C:/Users/hiter/Pictures/Camera Roll/2023年5月10日坐标转换照片/MER2-502-79U3C(FCA22100486)/1.png"; // 用于确定发射系统坐标系
 
-const char* imageName_L = "C:/Users/hiter/Pictures/Camera Roll/2023年4月24日2m基线30m棋盘格标定1/MER2-502-79U3C(FCA22100486)/left12.png"; // 用于检测深度的图像
-const char* imageName_R = "C:/Users/hiter/Pictures/Camera Roll/2023年4月24日2m基线30m棋盘格标定1/MER2-502-79U3C(FCA22080343)/right12.png";
+// -----------------------------双目相机参数-------------------------
+const char* imageName_L = "C:/Users/hiter/Pictures/Camera Roll/2023年5月10日棋盘格标定1/MER2-502-79U3C(FCA22100486)/MER2-502-79U3C(FCA22100486)_2023-05-10_17_19_37_126-110.png"; // 用于检测深度的图像
+const char* imageName_R = "C:/Users/hiter/Pictures/Camera Roll/2023年5月10日棋盘格标定1/MER2-502-79U3C(FCA22080343)/MER2-502-79U3C(FCA22080343)_2023-05-10_17_19_37_138-104.png";
 enum boardType { chess, asymmetric };//选择标定板类型 棋盘格 非对称圆点
 //------------棋盘格--------------
 Size patternSize = Size(8, 10); // 棋盘格行列内角点个数
 boardType boardtype = chess;
-
 //------------非对称圆点--------------
 //Size patternSize = Size(4, 5); // 非对称圆点
 //boardType boardtype = asymmetric;
 
 const char* stereoRectifyParams = "./image/stereoRectifyParams.txt"; // 存放立体校正参数
 Mat cameraMatrix_L = (cv::Mat_<float>(3, 3) <<
-	9770.6, 0, 1213.3,
-	0, 9781.1, 1474,
+	10214, 0, 1182.3,
+	0, 10215, 1088.7,
 	0, 0, 1); // 左相机的内参数
 Mat cameraMatrix_R = (cv::Mat_<float>(3, 3) <<
-	9744.5, 0, 1229.6,
-	0, 9755.1, 1449.3,
+	10191, 0, 1109.1,
+	0, 10193, 1051.8,
 	0, 0, 1); // 右相机的内参数
 //左右相机畸变系数 最后一个参数置0的话效果不一样
-Mat distCoeffs_L = (Mat_<float>(1, 4) << 0.072792, 1.5596, 0.015321, -7.997e-05); // 左相机的畸变系数
-Mat distCoeffs_R = (Mat_<float>(1, 4) << 0.078458, 2.37, 0.015288, 6.2239e-05);// 右相机的畸变系数
+Mat distCoeffs_L = (Mat_<float>(1, 4) << 0.17233, 0.3183, 0.0029758, -0.00045891); // 左相机的畸变系数
+Mat distCoeffs_R = (Mat_<float>(1, 4) << 0.18298, -0.75743, 0.0011867, -0.0050028);// 右相机的畸变系数
 //旋转矩阵
 Mat R = (cv::Mat_<double>(3, 3) <<
-	0.9984, -0.036041, 0.04359,
-	0.036285, 0.99933, -0.0048084,
-	- 0.043387, 0.0063824, 0.99904);
+	0.99922, 0.025145, 0.030505,
+	- 0.025192, 0.99968, 0.0011408,
+	- 0.030467, -0.0019084, 0.99953);
 
 //平移矩阵
 Mat T = (cv::Mat_<double>(3, 1) <<
-	-1889.3,
-	- 31.537,
-	52.882);
+	-1795.3,
+	28.932,
+	- 2.2413);
 // 图像尺寸
 Size imageSize(2448, 2048);
-
 
 Mat R1, R2, P1, P2, Q; // 立体校正参数
 Mat mapl1, mapl2, mapr1, mapr2; // 图像重投影映射表
 Mat img1_rectified, img2_rectified, result3DImage; // 校正图像  深度图
 Rect validRoi[2];
+
+//坐标转换参数
+Mat Ra, Ta, Rb, Tb, Rt, Tt;
 
 
 
@@ -198,13 +209,26 @@ bool computeChessboardDistance(const char* imageName1, const char* imageName2, M
 		double x_R = cornersR[i].x;
 		double y_L = cornersL[i].y;
 		double y_R = cornersR[i].y;
-		double Zc = f * B / abs(x_L - x_R);
-		double Xc, Yc, edistance;
+		double Xc, Yc, Zc, edistance;
+
+		cout << "*************************旧公式****************************" << endl;
+		Zc = f * B / abs(x_L - x_R);
 		Xc = (Zc * (x_L + Q.at<double>(0, 3))) / f;
 		Yc = (Zc * (y_L + Q.at<double>(1, 3))) / f;
 		edistance = sqrt(Zc * Zc + Xc * Xc + Yc * Yc);
 		cout << i << " 点的坐标为: (" << Xc << ", " << Yc << ", " << Zc << ") 欧氏距离为：" << edistance << " 单位: mm" << endl;
 		cout << "   视差大小：" << abs(x_L - x_R) << endl;
+
+		cout << "*************************新公式****************************" << endl;
+		Zc = Q.at<double>(2, 3) / (Q.at<double>(3, 2) * (x_L - x_R) + Q.at<double>(3, 3));
+		Xc = (Q.at<double>(0, 0) * x_L + Q.at<double>(0, 3)) / (Q.at<double>(3, 2) * (x_L - x_R) + Q.at<double>(3, 3));
+		Yc = (Q.at<double>(1, 1) * y_L + Q.at<double>(1, 3)) / (Q.at<double>(3, 2) * (x_L - x_R) + Q.at<double>(3, 3));
+		edistance = sqrt(Zc * Zc + Xc * Xc + Yc * Yc);
+		cout << i << " 点的坐标为: (" << Xc << ", " << Yc << ", " << Zc << ") 欧氏距离为：" << edistance << " 单位: mm" << endl;
+		cout << "   视差大小：" << abs(x_L - x_R) << endl;
+		Mat rever = (cv::Mat_<double>(3, 1) << Xc, Yc, Zc);
+		cout << "左乘R1的逆的坐标： " << endl << R1.inv() * rever << endl;
+		cout << "在发射系统坐标系下的坐标：" << endl << Rt * R1.inv() * rever + Tt << endl;
 	}
 
 	return true;
@@ -221,9 +245,89 @@ void onMouse(int event, int x, int y, int flags, void* param)
 		cout << result3DImage.at<Vec3f>(point) << endl;
 	}
 }
+//计算相机俯视状态下到发射系统的坐标转换矩阵
+//分为两步，先通过旋转角度和旋转轴长度计算R1、T1，而后通过pnp计算R2、T2
+
+void CalR2T2(Mat &R1,Mat &T1,Mat &R2, Mat &T2, Mat& Rt, Mat& Tt, double &rollangle, double &rl, Mat &CMatrix, Mat &distCoeffs, const char *image)
+{
+	//------------计算R1、T1----------------
+	//绕x轴旋转rollangle角度
+	double rx = rollangle * CV_PI / 180;
+	R1=(cv::Mat_<double>(3, 3) <<
+		1, 0, 0,
+		0, cos(rx), -sin(rx),
+		0, sin(rx), cos(rx));
+	T1 = (cv::Mat_<double>(3, 1) <<
+		0,
+		rl*(1-cos(rx)),
+		-rl*sin(rx));
+	cout << "R1: " << endl << R1 << endl;
+	cout << "T1: " << endl << T1 << endl;
+
+	//计算R2、T2
+	Mat chessboard = imread(image);
+	Mat graychessboard;
+	cvtColor(chessboard, graychessboard, CV_BGR2GRAY);
+	bool flag = false;
+	vector<Point2f> corners;
+	flag = findChessboardCorners(graychessboard, smallboard, corners);
+	if (flag == false) {
+		cout << "没有找到角点!!!!!!!!!!!!!!!!" << endl;
+	}
+	Mat out = graychessboard;
+	drawChessboardCorners(out, patternSize, corners, true);
+	for (int i = 0; i < corners.size(); i++) {
+		putText(out, to_string(i), corners[i], cv::FONT_HERSHEY_SIMPLEX, 0.4, Scalar(255, 0, 0), 1);
+	}
+	namedWindow("chessboard", WINDOW_NORMAL);
+	imshow("chessboard", out);
+	imwrite("./image/chessboard.png", out);
+	waitKey(0);
+
+	vector<Point3f> Points3D;
+	vector<Point2f> Points2D;
+	Points3D.push_back(Point3f(0, 0, 0));
+	Points3D.push_back(Point3f(300, 0, 0));
+	Points3D.push_back(Point3f(0, 210, 0));
+	Points3D.push_back(Point3f(300, 210, 0));
+	//Points3D.push_back(Point3f(120, 90, 0));
+	//Points3D.push_back(Point3f(90, 150, 0));
+	//*******************************注意角点提取的方向！！****************************
+	Points2D.push_back(Point2f(corners[80].x, corners[80].y));
+	Points2D.push_back(Point2f(corners[0].x, corners[0].y));
+	Points2D.push_back(Point2f(corners[87].x, corners[87].y));
+	Points2D.push_back(Point2f(corners[7].x, corners[7].y));
+	//Points2D.push_back(Point2f(corners[51].x, corners[51].y));
+	//Points2D.push_back(Point2f(corners[61].x, corners[61].y));
+	Mat R = Mat::zeros(3, 1, CV_64FC1);
+	Mat T = Mat::zeros(3, 1, CV_64FC1);
+
+	solvePnP(Points3D, Points2D, CMatrix, distCoeffs, R, T, false, SOLVEPNP_ITERATIVE);
+	double rm[9];
+	Mat rotM(3, 3, CV_64FC1, rm);
+	Rodrigues(R, rotM);//实测迭代法似乎只能用共面特征点求位置
+	//得到的rotM、T是发射系统坐标系到俯视角度相机坐标系的转换矩阵，需要再进行一步求相机到发射系统的转换关系
+	R2 = rotM.inv();
+	T2 = -1 * rotM.inv() * T;
+	cout << "旋转矩阵R2" << endl;
+	cout << R2 << endl;
+	cout << "平移矩阵T2" << endl;
+	cout << T2 << endl;
+
+	//合成最终的坐标变换矩阵
+	cout << "合成最终的坐标转换矩阵" << endl;
+	Rt = R2 * R1;
+	Tt = R2 * T1 + T2;
+	cout << "Rt: " << endl << Rt << endl;
+	cout << "Tt: " << endl << Tt << endl;
+}
 
 int main()
 {
+	
+	//计算相机到发射系统下的坐标变换关系
+	CalR2T2(Ra, Ta, Rb, Tb, Rt, Tt, rollangle, rollLengh, leftCMatrix, leftCdistCoeffs, imageL);
+	
 	//进行立体校正
 	validRoi[0], validRoi[1] = stereoRectification(stereoRectifyParams, cameraMatrix_L, distCoeffs_L, cameraMatrix_R, distCoeffs_R,
 		imageSize, R, T, R1, R2, P1, P2, Q, mapl1, mapl2, mapr1, mapr2);
